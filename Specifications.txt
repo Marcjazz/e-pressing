@@ -1,0 +1,16 @@
+Specifications
+- cash in
+- give out
+
+
+functionalities
+- (5) login
+- (6) reset-password
+- (7) manage accounts
+- (1) cofigure (clothing, pricing)
+- (2) cash in (advance given, indice supplementaire) 
+- (3) give out (completed, piece par piece)
+- (8) graph (cash in, cash out, amount)
+- (4) list of all entries ordered by date, type and category
+
+- (0) how do I get money out of this?
