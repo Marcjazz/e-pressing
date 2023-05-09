@@ -7,7 +7,7 @@ functionalities
 - (5) login
 - (6) reset-password
 - (7) manage accounts
-- (1) cofigure (clothing, pricing)
+- (1) cofigure (clothing, pricing) ✂️
 - (2) cash in (advance given, indice supplementaire) 
 - (3) give out (completed, piece par piece)
 - (8) graph (cash in, cash out, amount)
