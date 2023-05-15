@@ -1,4 +1,5 @@
 import Layout from '../pages/layout';
+import Order from '../pages/order';
 
 export const routes = [
   // {
@@ -8,7 +9,7 @@ export const routes = [
   {
     path: '',
     element: <Layout />,
-    // children: [{ path: 'schools', element: <Schools /> }],
+    children: [{ path: 'record', element: <Order /> }],
   },
   //   {
   //     path: '*',
