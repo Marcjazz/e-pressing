@@ -9,7 +9,8 @@ export interface IOrdersProps {
 
 export default function Orders(props: IOrdersProps) {
   const [orders, setOrders] = useState<IOrder[]>([]);
-  
+
+  //TODO call api to fetch registered orders
   useEffect(() => {
     setOrders([
       {
@@ -78,7 +79,6 @@ export default function Orders(props: IOrdersProps) {
     ]);
   }, []);
 
-  
   return (
     <Box>
       <Typography variant="h4">All recorded cloths</Typography>

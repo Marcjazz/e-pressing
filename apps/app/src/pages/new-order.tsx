@@ -71,6 +71,7 @@ function useNewOrder() {
     const errors = validtedFields();
     if (errors.length === 0) {
       console.log(newItems.map((_) => _.value));
+      //TODO call api to register new order
     }
   };
 

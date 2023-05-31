@@ -1,10 +1,9 @@
 import { ClothStatus, ICreateCloth, IOrder } from '@e-pressing/interfaces';
-import { Delete } from '@mui/icons-material';
 import {
   Box,
+  Button,
   Checkbox,
   Chip,
-  IconButton,
   Paper,
   Table,
   TableBody,
@@ -14,24 +13,26 @@ import {
   TablePagination,
   TableRow,
   Toolbar,
-  Tooltip,
   Typography,
   alpha,
 } from '@mui/material';
 import { useMemo, useState } from 'react';
-import OrderCardItem from './orderCardItem';
 import { theme } from '../theme';
+import OrderCardItem from './orderCardItem';
 
 interface EnhancedTableToolbarProps {
   numSelected: number;
   order_number: string;
   status: ClothStatus;
+  handleDelivery: () => void;
 }
 
 function EnhancedTableToolbar({
   numSelected,
   order_number,
   status,
+
+  handleDelivery,
 }: EnhancedTableToolbarProps) {
   return (
     <Toolbar
@@ -76,11 +77,16 @@ function EnhancedTableToolbar({
             : 'info'
         }
       />
-      <Tooltip title="Delete">
-        <IconButton>
-          <Delete />
-        </IconButton>
-      </Tooltip>
+      <Button
+        sx={{
+          marginLeft: theme.spacing(2),
+        }}
+        onClick={handleDelivery}
+        variant="contained"
+        disabled={numSelected === 0}
+      >
+        Deliver
+      </Button>
     </Toolbar>
   );
 }
@@ -218,10 +224,16 @@ export default function OrderCard({
   const emptyRows =
     page > 0 ? Math.max(0, (1 + page) * rowsPerPage - cloths.length) : 0;
 
+  const handleDelivery = () => {
+    console.log(selected);
+    //TODO call api to give out registered items
+  };
+
   return (
     <Box sx={{ width: '100%' }}>
       <Paper sx={{ width: '100%', mb: 2 }}>
         <EnhancedTableToolbar
+          handleDelivery={handleDelivery}
           numSelected={selected.length}
           order_number={order_number}
           status={status}
@@ -271,7 +283,7 @@ export default function OrderCard({
             paddingLeft: theme.spacing(2),
           }}
         >
-          <Typography variant='h6'>
+          <Typography variant="h6">
             {`Total: ${cloths.reduce(
               (total, { quantity, washing_price }) =>
                 total + quantity * washing_price,
