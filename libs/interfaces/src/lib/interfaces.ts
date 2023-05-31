@@ -1,7 +1,6 @@
 export type ClothStatus = 'IN' | 'READY' | 'OUT';
 export interface ICreateCloth {
   cloth_name: string;
-  cloth_color: string;
   washing_price: number;
   quantity: number;
 }
