@@ -43,8 +43,8 @@ function ResponsiveAppBar() {
   const { formatMessage } = useIntl();
   const pages = [
     { route: 'dashboard', name: formatMessage({ id: 'dashboard' }) },
-    { route: 'record', name: formatMessage({ id: 'recordOrder' }) },
-    { route: 'serve', name: formatMessage({ id: 'serveOrder' }) },
+    { route: 'new', name: formatMessage({ id: 'recordOrder' }) },
+    { route: 'orders', name: formatMessage({ id: 'serveOrder' }) },
   ];
   const settings = [
     { route: 'accounts', name: formatMessage({ id: 'manageAccounts' }) },

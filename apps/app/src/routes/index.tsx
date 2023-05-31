@@ -1,5 +1,6 @@
-import Layout from '../pages/layout';
-import Order from '../pages/order';
+import Layout from './layout';
+import NewOrder from '../pages/new-order';
+import Orders from '../pages/orders';
 
 export const routes = [
   // {
@@ -9,7 +10,10 @@ export const routes = [
   {
     path: '',
     element: <Layout />,
-    children: [{ path: 'record', element: <Order /> }],
+    children: [
+      { path: 'new', element: <NewOrder /> },
+      { path: 'orders', element: <Orders /> },
+    ],
   },
   //   {
   //     path: '*',

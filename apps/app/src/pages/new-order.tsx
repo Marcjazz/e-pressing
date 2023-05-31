@@ -2,9 +2,9 @@ import { ICreateCloth } from '@e-pressing/interfaces';
 import { Add } from '@mui/icons-material';
 import { Box, Button, IconButton, Tooltip, Typography } from '@mui/material';
 import { useState } from 'react';
-import InputCard, { Error, Item } from '../../components/inputCard';
+import InputCard, { Error, Item } from '../components/inputCard';
 
-export interface IOrderProps {
+export interface INewOrderProps {
   children?: JSX.Element;
 }
 
@@ -85,7 +85,7 @@ function useNewOrder() {
     },
   };
 }
-export default function Order(props: IOrderProps) {
+export default function NewOrder(props: INewOrderProps) {
   const {
     errors,
     newItems,
