@@ -11,7 +11,6 @@ import MenuItem from '@mui/material/MenuItem';
 import Toolbar from '@mui/material/Toolbar';
 import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
-import Scrollbars from 'rc-scrollbars';
 import * as React from 'react';
 import { useIntl } from 'react-intl';
 import { Outlet, useNavigate } from 'react-router';
@@ -202,14 +201,12 @@ function ResponsiveAppBar() {
           height: '100%',
           display: 'grid',
           justifyContent: 'center',
-          padding: theme.spacing(5),
+          padding: theme.spacing(2),
           gridTemplateRows: 'auto 1fr',
           rowGap: theme.spacing(4.375),
         }}
       >
-        <Scrollbars autoHide autoHeight>
-          <Outlet />
-        </Scrollbars>
+        <Outlet />
       </Box>
     </Box>
   );
