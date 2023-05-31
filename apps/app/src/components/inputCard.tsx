@@ -1,19 +1,31 @@
 import { ICreateCloth } from '@e-pressing/interfaces';
 import { Box, TextField, Typography } from '@mui/material';
 import { theme } from '../theme';
+
+export type Error = {
+  error: string;
+  item_id: number;
+  field: keyof ICreateCloth;
+};
+export type Item = { item_id: number; value: ICreateCloth };
 interface InputCardProps extends ICreateCloth {
+  errors: Error[];
   textFieldId: number;
   children?: JSX.Element;
   onChangeHandler: (id: number, updatedCloth: Partial<ICreateCloth>) => void;
 }
 export default function InputCard({
-  cloth_name,
+  errors,
   quantity,
+  cloth_name,
   washing_price,
 
   textFieldId,
   onChangeHandler,
 }: InputCardProps) {
+  const textFieldError = errors.find(
+    (_) => _.item_id === textFieldId && _.field === 'cloth_name'
+  )?.error;
   return (
     <Box
       sx={{
@@ -32,12 +44,16 @@ export default function InputCard({
         fullWidth
         variant="standard"
         value={cloth_name}
-        onChange={(e) => onChangeHandler(textFieldId, { cloth_name })}
+        helperText={textFieldError}
+        error={Boolean(textFieldError)}
+        onChange={(e) =>
+          onChangeHandler(textFieldId, { cloth_name: e.target.value })
+        }
       />
       <Box
         sx={{
           display: 'grid',
-          gridTemplateColumns: '1fr auto',
+          gridTemplateColumns: 'auto 1fr',
           columnGap: 1,
         }}
       >
@@ -49,7 +65,11 @@ export default function InputCard({
           variant="standard"
           type="number"
           value={washing_price}
-          onChange={(e) => onChangeHandler(textFieldId, { washing_price })}
+          onChange={(e) =>
+            onChangeHandler(textFieldId, {
+              washing_price: Number(e.target.value),
+            })
+          }
         />
         <TextField
           id={`quantity-${textFieldId}`}
@@ -59,7 +79,9 @@ export default function InputCard({
           variant="standard"
           type="number"
           value={quantity}
-          onChange={(e) => onChangeHandler(textFieldId, { quantity })}
+          onChange={(e) =>
+            onChangeHandler(textFieldId, { quantity: Number(e.target.value) })
+          }
         />
       </Box>
       <Box sx={{ display: 'grid', gridAutoFlow: 'column', columnGap: 1 }}>

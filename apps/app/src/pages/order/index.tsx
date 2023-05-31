@@ -1,41 +1,36 @@
 import { ICreateCloth } from '@e-pressing/interfaces';
 import { Add } from '@mui/icons-material';
-import { Box, IconButton, Tooltip, Typography } from '@mui/material';
+import { Box, Button, IconButton, Tooltip, Typography } from '@mui/material';
 import { useState } from 'react';
-import InputCard from '../../components/inputCard';
+import InputCard, { Error, Item } from '../../components/inputCard';
 
 export interface IOrderProps {
   children?: JSX.Element;
 }
-export type Error =
-  | { field: 'description'; error: string }
-  | { field: 'cloths'; fake_id: number; error: string };
 
 function useNewOrder() {
-  const [newItems, setNewItems] = useState<
-    { fake_id: number; value: ICreateCloth }[]
-  >([]);
+  const [newItems, setNewItems] = useState<Item[]>([]);
 
-  const [errors, setErrors] = useState<Error[]>();
+  const [errors, setErrors] = useState<Error[]>([]);
 
   const addClothHandler = () => {
-    setNewItems((newItems) => [
-      ...newItems,
-      {
-        fake_id: newItems.length + 1,
-        value: {
-          cloth_color: '',
-          cloth_name: '',
-          quantity: 1,
-          remarks: '',
-          washing_price: 100,
+    const errors = validtedFields();
+    if (errors.length === 0)
+      setNewItems((newItems) => [
+        {
+          item_id: newItems.length + 1,
+          value: {
+            cloth_name: '',
+            quantity: 1,
+            washing_price: 100,
+          },
         },
-      },
-    ]);
+        ...newItems,
+      ]);
   };
 
   const removeClothHandler = (fake_id: number) => {
-    setNewItems((newItems) => newItems.filter((_) => _.fake_id === fake_id));
+    setNewItems((newItems) => newItems.filter((_) => _.item_id === fake_id));
   };
 
   const updateClothHandler = (
@@ -43,44 +38,44 @@ function useNewOrder() {
     updatedCloth: Partial<ICreateCloth>
   ) => {
     setNewItems((newItems) =>
-      newItems.map((cloth) =>
-        cloth.fake_id === fake_id ? { ...cloth, ...updatedCloth } : cloth
-      )
+      newItems.map((cloth) => {
+        return cloth.item_id === fake_id
+          ? { item_id: fake_id, value: { ...cloth.value, ...updatedCloth } }
+          : cloth;
+      })
     );
+    validtedFields();
+  };
+
+  const validtedFields = () => {
+    setErrors([]);
+    const newErrors: Error[] = [];
+    newItems.forEach(({ item_id, value: cloth }) => {
+      Object.keys(cloth).forEach((key) => {
+        const clothKey = key as keyof ICreateCloth;
+        if (!cloth[clothKey]) {
+          const newError: Error = {
+            item_id,
+            field: clothKey,
+            error: `This field is required !`,
+          };
+          newErrors.push(newError);
+        }
+      });
+    });
+    setErrors((errors) => (errors ? [...errors, ...newErrors] : newErrors));
+    return newErrors;
   };
 
   const sumbitNewOrderHandler = () => {
-    if (newItems.length === 0) {
-      const newError: Error = {
-        field: 'cloths',
-        fake_id: 0,
-        error: 'There must be at least 1 cloths in the order',
-      };
-      setErrors((errors) => (errors ? [...errors, newError] : [newError]));
-    } else {
-      newItems.forEach(({ fake_id, value: cloth }) => {
-        Object.keys(cloth).forEach((key) =>
-          !cloth[key as keyof ICreateCloth]
-            ? setErrors((errors) =>
-                errors
-                  ? [...errors]
-                  : [
-                      {
-                        fake_id,
-                        field: 'cloths',
-                        error: `cloth's ${key} is required !`,
-                      },
-                    ]
-              )
-            : {}
-        );
-      });
+    const errors = validtedFields();
+    if (errors.length === 0) {
+      console.log(newItems.map((_) => _.value));
     }
-
-    if (errors?.length === 0) return newItems.map((_) => _.value);
   };
 
   return {
+    errors,
     newItems,
     dispatchers: {
       addClothHandler,
@@ -92,8 +87,9 @@ function useNewOrder() {
 }
 export default function Order(props: IOrderProps) {
   const {
+    errors,
     newItems,
-    dispatchers: { addClothHandler, updateClothHandler },
+    dispatchers: { addClothHandler, updateClothHandler, sumbitNewOrderHandler },
   } = useNewOrder();
   return (
     <Box height={'100%'}>
@@ -101,7 +97,7 @@ export default function Order(props: IOrderProps) {
       <Box
         sx={{
           display: 'grid',
-          gridTemplateRows: 'auto 1fr',
+          gridTemplateRows: 'auto auto 1fr',
           rowGap: 2,
         }}
       >
@@ -117,15 +113,23 @@ export default function Order(props: IOrderProps) {
             {new Date().toUTCString()}
           </Typography>
           <IconButton onClick={addClothHandler}>
-            <Tooltip title="add new Cloth">
+            <Tooltip title="add new item">
               <Add color="secondary" />
             </Tooltip>
           </IconButton>
         </Box>
-        {newItems.map(({ fake_id, value }) => (
+        <Button
+          size="small"
+          variant="contained"
+          onClick={sumbitNewOrderHandler}
+        >
+          submit
+        </Button>
+        {newItems.map(({ item_id: fake_id, value }) => (
           <InputCard
             {...value}
             key={fake_id}
+            errors={errors}
             textFieldId={fake_id}
             onChangeHandler={updateClothHandler}
           />
