@@ -43,12 +43,12 @@ function ResponsiveAppBar() {
   const { formatMessage } = useIntl();
   const pages = [
     { route: 'dashboard', name: formatMessage({ id: 'dashboard' }) },
-    { route: 'new', name: formatMessage({ id: 'recordOrder' }) },
-    { route: 'orders', name: formatMessage({ id: 'serveOrder' }) },
+    { route: '/-/new', name: formatMessage({ id: 'recordOrder' }) },
+    { route: '/-/orders', name: formatMessage({ id: 'serveOrder' }) },
   ];
   const settings = [
-    { route: 'accounts', name: formatMessage({ id: 'manageAccounts' }) },
-    { route: 'logout', name: formatMessage({ id: 'logout' }) },
+    { route: '/-/accounts', name: formatMessage({ id: 'manageAccounts' }) },
+    { route: '/-/logout', name: formatMessage({ id: 'logout' }) },
   ];
 
   return (
