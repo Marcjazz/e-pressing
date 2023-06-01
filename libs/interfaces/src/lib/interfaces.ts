@@ -1,4 +1,4 @@
-export type ClothStatus = 'PENDING' | 'READY' | 'REMOVED';
+export type ClothStatus = 'PENDING' | 'WASHED' | 'REMOVED';
 export interface ICreateCloth {
   cloth_name: string;
   washing_price: number;
