@@ -13,7 +13,6 @@ export interface ICreateOrder {
 }
 
 export interface IOrder extends ICreateOrder {
-  order_id: string;
   cloths: ICloth[];
   order_number: string;
   status: ClothStatus;
