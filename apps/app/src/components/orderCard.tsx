@@ -59,7 +59,7 @@ function EnhancedTableToolbar({
         </Typography>
       ) : (
         <Typography
-          sx={{ flex: '1 1 100%' }}
+          sx={{ flex: 1 }}
           variant="h6"
           id="tableTitle"
           component="div"
@@ -77,21 +77,24 @@ function EnhancedTableToolbar({
             : 'info'
         }
       />
-      <Button
-        sx={{
-          marginLeft: theme.spacing(2),
-        }}
-        onClick={handleDelivery}
-        variant="contained"
-        disabled={numSelected === 0}
-      >
-        Deliver
-      </Button>
+      {status !== 'REMOVED' && (
+        <Button
+          sx={{
+            marginLeft: theme.spacing(2),
+          }}
+          onClick={handleDelivery}
+          variant="contained"
+          size="small"
+          disabled={numSelected === 0}
+        >
+          {status === 'PENDING' ? 'update to washed' : 'update to revomed'}
+        </Button>
+      )}
     </Toolbar>
   );
 }
 
-type KeyOfData = keyof ICreateCloth | 'total';
+type KeyOfData = keyof ICreateCloth | 'total' | 'cloth_status';
 interface HeadCell {
   disablePadding: boolean;
   id: KeyOfData;
@@ -113,6 +116,12 @@ function EnhancedTableHead(props: EnhancedTableProps) {
       numeric: false,
       disablePadding: true,
       label: 'Item description',
+    },
+    {
+      id: 'cloth_status',
+      numeric: false,
+      disablePadding: true,
+      label: 'Status',
     },
     {
       id: 'washing_price',
@@ -164,16 +173,22 @@ function EnhancedTableHead(props: EnhancedTableProps) {
 
 export interface IOrderCardItemProps extends IOrder {
   children?: JSX.Element;
+  handleStatusChange: (
+    status: ClothStatus,
+    selected: readonly string[]
+  ) => void;
 }
 
 export default function OrderCard({
   cloths,
   order_number,
   status,
+  handleStatusChange,
 }: IOrderCardItemProps) {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [selected, setSelected] = useState<readonly string[]>([]);
+  const [selectedGroupStatus, setSelectedGroupStatus] = useState<ClothStatus>();
 
   const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.checked) {
@@ -184,12 +199,16 @@ export default function OrderCard({
     setSelected([]);
   };
 
-  const handleClick = (event: React.MouseEvent<unknown>, cloth_id: string) => {
+  const handleSelect = (event: React.MouseEvent<unknown>, cloth_id: string) => {
     const selectedIndex = selected.indexOf(cloth_id);
     let newSelected: readonly string[] = [];
-
     if (selectedIndex === -1) {
-      newSelected = newSelected.concat(selected, cloth_id);
+      const cloth = cloths.find((_) => _.cloth_id === cloth_id);
+      if (cloth && cloth.status !== 'REMOVED' && selected.length === 0) {
+        setSelectedGroupStatus(cloth?.status);
+        newSelected = newSelected.concat(selected, cloth_id);
+      } else if (cloth?.status === selectedGroupStatus)
+        newSelected = newSelected.concat(selected, cloth_id);
     } else if (selectedIndex === 0) {
       newSelected = newSelected.concat(selected.slice(1));
     } else if (selectedIndex === selected.length - 1) {
@@ -224,19 +243,22 @@ export default function OrderCard({
   const emptyRows =
     page > 0 ? Math.max(0, (1 + page) * rowsPerPage - cloths.length) : 0;
 
-  const handleDelivery = () => {
-    console.log(selected);
-    //TODO call api to give out registered items
-  };
-
   return (
     <Box sx={{ width: '100%' }}>
       <Paper sx={{ width: '100%', mb: 2 }}>
         <EnhancedTableToolbar
-          handleDelivery={handleDelivery}
+          handleDelivery={() =>
+            handleStatusChange(selectedGroupStatus as ClothStatus, selected)
+          }
           numSelected={selected.length}
           order_number={order_number}
-          status={status}
+          status={
+            selectedGroupStatus ?? cloths.find((_) => _.status === 'PENDING')
+              ? 'PENDING'
+              : cloths.find((_) => _.status === 'WASHED')
+              ? 'WASHED'
+              : 'REMOVED'
+          }
         />
         <TableContainer>
           <Table
@@ -258,7 +280,7 @@ export default function OrderCard({
                   <OrderCardItem
                     {...cloth}
                     labelId={labelId}
-                    handleClick={handleClick}
+                    handleClick={handleSelect}
                     isItemSelected={isItemSelected}
                   />
                 );

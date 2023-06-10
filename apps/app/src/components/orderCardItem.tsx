@@ -1,5 +1,5 @@
 import { ICloth } from '@e-pressing/interfaces';
-import { Checkbox, TableCell, TableRow } from '@mui/material';
+import { Checkbox, TableCell, TableRow, Typography } from '@mui/material';
 import { MouseEvent } from 'react';
 
 export interface IOrderCardItemProps extends ICloth {
@@ -42,6 +42,22 @@ export default function OrderCardItem({
       </TableCell>
       <TableCell component="th" id={labelId} scope="row" padding="none">
         {cloth_name}
+      </TableCell>
+      <TableCell align="left" padding="none">
+        <Typography
+         variant='subtitle1'
+          sx={{
+            textTransform: 'capitalize',
+            color:
+              status === 'PENDING'
+                ? '#ed6c02'
+                : status === 'REMOVED'
+                ? '#00ba88'
+                : '#3498db',
+          }}
+        >
+          {status.toLowerCase()}
+        </Typography>
       </TableCell>
       <TableCell align="right">{washing_price}</TableCell>
       <TableCell align="right">{quantity}</TableCell>
