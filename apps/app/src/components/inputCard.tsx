@@ -1,18 +1,12 @@
-import { ICreateCloth } from '@e-pressing/interfaces';
+import { Error, ICreateCloth } from '@e-pressing/interfaces';
 import { Box, TextField, Typography } from '@mui/material';
 import { theme } from '../theme';
 
-export type Error = {
-  error: string;
-  item_id: number;
-  field: keyof ICreateCloth;
-};
-export type Item = { item_id: number; value: ICreateCloth };
 interface InputCardProps extends ICreateCloth {
   errors: Error[];
-  textFieldId: number;
+  textFieldId: string;
   children?: JSX.Element;
-  onChangeHandler: (id: number, updatedCloth: Partial<ICreateCloth>) => void;
+  onChangeHandler: (id: string, updatedCloth: Partial<ICreateCloth>) => void;
 }
 export default function InputCard({
   errors,

@@ -18,3 +18,10 @@ export interface IOrderDetails extends ICreateOrder {
   cloths: ICloth[];
   order_number: string;
 }
+export type Client = Omit<ICreateOrder, 'cloths'>;
+export type Error = {
+  error: string;
+  item_id: string;
+  field: keyof (ICreateCloth & Client);
+};
+export type Item = { item_id: string; value: ICreateCloth };
