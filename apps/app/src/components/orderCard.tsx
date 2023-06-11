@@ -1,4 +1,8 @@
-import { ClothStatus, ICreateCloth, IOrderDetails } from '@e-pressing/interfaces';
+import {
+  ClothStatus,
+  ICreateCloth,
+  IOrderDetails,
+} from '@e-pressing/interfaces';
 import {
   Box,
   Button,
@@ -190,7 +194,14 @@ export default function OrderCard({
   const [selectedGroupStatus, setSelectedGroupStatus] = useState<ClothStatus>();
 
   const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.checked) {
+    if (
+      event.target.checked &&
+      cloths.reduce(
+        (bool, _) =>
+          bool && cloths.reduce((b, __) => b && _.status === __.status, true),
+        true
+      )
+    ) {
       const newSelected = cloths.map((n) => n.cloth_id);
       setSelected(newSelected);
       return;
