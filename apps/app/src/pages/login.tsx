@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { useRealmApp } from '../providers/realm';
 import { Adb } from '@mui/icons-material';
 import { useNavigate } from 'react-router';
+import { toast } from 'react-toastify';
 
 export default function LogIn() {
   const { logIn, user } = useRealmApp();
@@ -16,8 +17,13 @@ export default function LogIn() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
-  async function handleLogIn() {
-    await logIn(email, password);
+  function handleLogIn() {
+    logIn(email, password)
+      .then((user) => {
+        if (user) toast.success(`Welcome back ${user?.profile.firstName} !!!`);
+        else toast.error('Incorrect user email or password.');
+      })
+      .catch(toast.error);
   }
 
   return (
@@ -68,7 +74,7 @@ export default function LogIn() {
           required
           fullWidth
           type="email"
-          placeholder="mongodb@example.com"
+          placeholder="username@example.com"
           onChange={(e) => setEmail(e.target.value)}
           value={email}
           variant="standard"

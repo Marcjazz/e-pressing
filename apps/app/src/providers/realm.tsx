@@ -4,7 +4,7 @@ import React, { useContext, useState } from 'react';
 import { toast } from 'react-toastify';
 
 const RealmAppContext = React.createContext<{
-  logIn: (email: string, password: string) => unknown;
+  logIn: (email: string, password: string) => Promise<RealmWeb.User | null>;
   logOut: () => void;
   user: RealmWeb.User | null;
 } | null>(null);
