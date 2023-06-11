@@ -12,7 +12,7 @@ const MongoDB = ({ children }: { children: JSX.Element }) => {
 
   useEffect(() => {
     if (user !== null) {
-      const realmService = user.mongoClient('e-pressing');
+      const realmService = user.mongoClient('mongodb-atlas');
       setDb(realmService.db('epressing_db'));
     }
   }, [user]);
