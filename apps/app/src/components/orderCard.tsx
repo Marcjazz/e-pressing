@@ -1,4 +1,4 @@
-import { ClothStatus, ICreateCloth, IOrder } from '@e-pressing/interfaces';
+import { ClothStatus, ICreateCloth, IOrderDetails } from '@e-pressing/interfaces';
 import {
   Box,
   Button,
@@ -171,7 +171,7 @@ function EnhancedTableHead(props: EnhancedTableProps) {
   );
 }
 
-export interface IOrderCardItemProps extends IOrder {
+export interface IOrderCardItemProps extends IOrderDetails {
   children?: JSX.Element;
   handleStatusChange: (
     status: ClothStatus,
@@ -182,7 +182,6 @@ export interface IOrderCardItemProps extends IOrder {
 export default function OrderCard({
   cloths,
   order_number,
-  status,
   handleStatusChange,
 }: IOrderCardItemProps) {
   const [page, setPage] = useState(0);

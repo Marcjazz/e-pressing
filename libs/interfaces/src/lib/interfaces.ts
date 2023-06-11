@@ -10,10 +10,11 @@ export interface ICloth extends ICreateCloth {
 }
 export interface ICreateOrder {
   cloths: ICreateCloth[];
+  client_fullname: string;
+  client_phone_number: string;
 }
 
-export interface IOrder extends ICreateOrder {
+export interface IOrderDetails extends ICreateOrder {
   cloths: ICloth[];
   order_number: string;
-  status: ClothStatus;
 }
