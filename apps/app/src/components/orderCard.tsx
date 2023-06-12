@@ -203,6 +203,7 @@ export default function OrderCard({
       )
     ) {
       const newSelected = cloths.map((n) => n.cloth_id);
+      setSelectedGroupStatus(cloths[0].status);
       setSelected(newSelected);
       return;
     }
@@ -257,9 +258,11 @@ export default function OrderCard({
     <Box sx={{ width: '100%' }}>
       <Paper sx={{ width: '100%', mb: 2 }}>
         <EnhancedTableToolbar
-          handleDelivery={() =>
-            handleStatusChange(selectedGroupStatus as ClothStatus, selected)
-          }
+          handleDelivery={() => {
+            handleStatusChange(selectedGroupStatus as ClothStatus, selected);
+            setSelectedGroupStatus(undefined);
+            setSelected([]);
+          }}
           numSelected={selected.length}
           order_number={order_number}
           status={
