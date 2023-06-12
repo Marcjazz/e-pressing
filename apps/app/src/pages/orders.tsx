@@ -15,7 +15,7 @@ import { useNavigate } from 'react-router';
 import OrderCard from '../components/orderCard';
 import { theme } from '../theme';
 import { useMongoDB } from '../providers/mongoDB';
-import { getOrders } from '../services/orders.service';
+import { changeOrderStatus, getOrders } from '../services/orders.service';
 import { toast } from 'react-toastify';
 
 export interface IOrdersProps {
@@ -32,7 +32,6 @@ export default function Orders(props: IOrdersProps) {
   const [status, setStatus] = useState<ClothStatus>();
   const [orderNumber, setOrderNUmber] = useState<string>();
 
-  //TODO call api to fetch registered orders with status and orderNumber
   useEffect(() => {
     if (!db) {
       toast.error('Mongo database was not loaded successfully !!!');
@@ -49,21 +48,28 @@ export default function Orders(props: IOrdersProps) {
     selected: readonly string[],
     newStatus: ClothStatus
   ) => {
-    //TODO call api to change cloth's item status
-    setOrders((orders) =>
-      orders.map((order) =>
-        order.order_number === orderNumber
-          ? {
-              ...order,
-              cloths: order.cloths.map((cloth) =>
-                selected.includes(cloth.cloth_id)
-                  ? { ...cloth, status: newStatus }
-                  : cloth
-              ),
-            }
-          : order
-      )
-    );
+    if (!db) {
+      toast.error('Mongo database was not loaded successfully !!!');
+      return navigate('/');
+    }
+    changeOrderStatus(db, { orderIds: selected, status: newStatus })
+      .then(() => {
+        setOrders((orders) =>
+          orders.map((order) =>
+            order.order_number === orderNumber
+              ? {
+                  ...order,
+                  cloths: order.cloths.map((cloth) =>
+                    selected.includes(cloth.cloth_id)
+                      ? { ...cloth, status: newStatus }
+                      : cloth
+                  ),
+                }
+              : order
+          )
+        );
+      })
+      .catch((error) => toast.error(error));
   };
 
   return (
