@@ -26,7 +26,16 @@ function useNewOrder() {
     client_fullname: '',
     client_phone_number: '',
   });
-  const [newItems, setNewItems] = useState<Item[]>([]);
+  const [newItems, setNewItems] = useState<Item[]>([
+    {
+      item_id: `item-1`,
+      value: {
+        cloth_name: '',
+        quantity: 1,
+        washing_price: 100,
+      },
+    },
+  ]);
 
   const [errors, setErrors] = useState<Error[]>([]);
 
@@ -147,6 +156,7 @@ export default function NewOrder(props: INewOrderProps) {
   const clientPhoneNumberError = errors.find(
     (_) => _.field === 'client_phone_number'
   )?.error;
+
   return (
     <Box
       sx={{
