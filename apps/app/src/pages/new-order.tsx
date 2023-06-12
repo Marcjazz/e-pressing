@@ -103,18 +103,15 @@ function useNewOrder() {
   const sumbitNewOrderHandler = () => {
     const errors = validtedFields();
     if (errors.length === 0) {
-      console.log('hello world');
-      //TODO
       if (!db) {
         toast.error('Mongo database was not loaded successfully !!!');
         return navigate('/');
       }
       createNewOrder(db, {
-        client_fullname: 'Kuidja Marco',
+        ...client,
         cloths: newItems.map((_) => _.value),
-        client_phone_number: '+237 652104890',
       })
-        .then((data) => console.log(data))
+        .then(() => navigate('/-/orders'))
         .catch(toast.error);
     }
   };
