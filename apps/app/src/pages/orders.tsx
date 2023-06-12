@@ -1,4 +1,4 @@
-import { ClothStatus, IOrder } from '@e-pressing/interfaces';
+import { ClothStatus, IOrderDetails } from '@e-pressing/interfaces';
 import { FilterList } from '@mui/icons-material';
 import {
   Box,
@@ -11,89 +11,60 @@ import {
   Typography,
 } from '@mui/material';
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router';
 import OrderCard from '../components/orderCard';
 import { theme } from '../theme';
+import { useMongoDB } from '../providers/mongoDB';
+import { getOrders } from '../services/orders.service';
+import { toast } from 'react-toastify';
 
 export interface IOrdersProps {
   children?: JSX.Element;
 }
 
 export default function Orders(props: IOrdersProps) {
-  const [orders, setOrders] = useState<IOrder[]>([]);
+  const { db } = useMongoDB();
+  const navigate = useNavigate();
+  const [orders, setOrders] = useState<IOrderDetails[]>([]);
 
   const [expanded, setExpanded] = useState(false);
 
-  const [status, setStatus] = useState<ClothStatus>('PENDING');
-  const [orderNumber, setOrderNUmber] = useState<string>('');
+  const [status, setStatus] = useState<ClothStatus>();
+  const [orderNumber, setOrderNUmber] = useState<string>();
 
   //TODO call api to fetch registered orders with status and orderNumber
   useEffect(() => {
-    setOrders([
-      {
-        cloths: [
-          {
-            cloth_id: crypto.randomUUID(),
-            cloth_name: 'T-Shirt rouge vif tienté de bleue',
-            quantity: 2,
-            status: 'PENDING',
-            washing_price: 1500,
-          },
-          {
-            cloth_id: crypto.randomUUID(),
-            cloth_name: 'Goodies nike, 37 model A5',
-            quantity: 2,
-            status: 'WASHED',
-            washing_price: 2500,
-          },
-        ],
-        order_id: crypto.randomUUID(),
-        order_number: 'PRESA06020',
-        status: 'PENDING',
-      },
-      {
-        cloths: [
-          {
-            cloth_id: crypto.randomUUID(),
-            cloth_name: 'T-Shirt rouge vif tienté de bleue',
-            quantity: 2,
-            status: 'PENDING',
-            washing_price: 1500,
-          },
-          {
-            cloth_id: crypto.randomUUID(),
-            cloth_name: 'Goodies nike, 37 model A5',
-            quantity: 2,
-            status: 'WASHED',
-            washing_price: 2500,
-          },
-        ],
-        order_id: crypto.randomUUID(),
-        order_number: 'PRESA060201',
-        status: 'WASHED',
-      },
-      {
-        cloths: [
-          {
-            cloth_id: crypto.randomUUID(),
-            cloth_name: 'T-Shirt rouge vif tienté de bleue',
-            quantity: 2,
-            status: 'PENDING',
-            washing_price: 1500,
-          },
-          {
-            cloth_id: crypto.randomUUID(),
-            cloth_name: 'Goodies nike, 37 model A5',
-            quantity: 2,
-            status: 'WASHED',
-            washing_price: 2500,
-          },
-        ],
-        order_id: crypto.randomUUID(),
-        order_number: 'PRESA060201',
-        status: 'REMOVED',
-      },
-    ]);
+    if (!db) {
+      toast.error('Mongo database was not loaded successfully !!!');
+      return navigate('/');
+    }
+    getOrders(db, { status, order_number: orderNumber })
+      .then(setOrders)
+      .catch(toast.error);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status, orderNumber]);
+
+  const handleStatusChange = (
+    orderNumber: string,
+    selected: readonly string[],
+    newStatus: ClothStatus
+  ) => {
+    //TODO call api to change cloth's item status
+    setOrders((orders) =>
+      orders.map((order) =>
+        order.order_number === orderNumber
+          ? {
+              ...order,
+              cloths: order.cloths.map((cloth) =>
+                selected.includes(cloth.cloth_id)
+                  ? { ...cloth, status: newStatus }
+                  : cloth
+              ),
+            }
+          : order
+      )
+    );
+  };
 
   return (
     <Box sx={{ minWidth: '50vw', display: 'grid', gridAutoFlow: 'row' }}>
@@ -129,7 +100,7 @@ export default function Orders(props: IOrdersProps) {
               defaultValue={status}
               onChange={(e) => setStatus(e.target.value as ClothStatus)}
             >
-              <MenuItem value="PEDING">Pending</MenuItem>
+              <MenuItem value="PENDING">Pending</MenuItem>
               <MenuItem value="READY">Ready</MenuItem>
               <MenuItem value="REMOVED">Removed</MenuItem>
             </TextField>
@@ -153,6 +124,8 @@ export default function Orders(props: IOrdersProps) {
       {orders.length === 0 ? (
         <Box
           sx={{
+            width: '300px',
+            minWidth: '60vw',
             display: 'grid',
             gridAutoFlow: 'row',
             gap: theme.spacing(2),
@@ -161,12 +134,24 @@ export default function Orders(props: IOrdersProps) {
           }}
         >
           <Typography variant="h6">No order is registered yet !</Typography>
-          <Button variant="contained">
+          <Button variant="contained" onClick={() => navigate('/-/new')}>
             new order
           </Button>
         </Box>
       ) : (
-        orders.map((order) => <OrderCard {...order} />)
+        orders.map((order, index) => (
+          <OrderCard
+            handleStatusChange={(status, selected) =>
+              handleStatusChange(
+                order.order_number,
+                selected,
+                status === 'PENDING' ? 'WASHED' : 'REMOVED'
+              )
+            }
+            key={index}
+            {...order}
+          />
+        ))
       )}
     </Box>
   );
