@@ -77,55 +77,73 @@ export default function Orders(props: IOrdersProps) {
       <Box
         sx={{
           display: 'grid',
-          gridTemplateColumns: '1fr auto auto',
+          gridTemplateColumns: {
+            sm: '1fr auto',
+            xs: 'auto',
+          },
         }}
       >
         <Typography variant="h4">All recorded cloths</Typography>
-        <Collapse
-          timeout="auto"
-          unmountOnExit
-          in={expanded}
-          orientation="horizontal"
+        <Box
+          sx={{
+            display: 'grid',
+            justifySelf: 'end',
+            padding: 1,
+            gridTemplateColumns: '1fr auto',
+          }}
         >
-          <Box
-            sx={{
-              display: 'grid',
-              gap: theme.spacing(1),
-              gridAutoFlow: 'column',
-            }}
+          <Collapse
+            timeout="auto"
+            unmountOnExit
+            in={expanded}
+            orientation="horizontal"
           >
-            <TextField
-              select
-              fullWidth
-              id="status"
-              name="status"
-              label="Order status"
-              size="small"
-              variant="standard"
-              value={status}
-              defaultValue={status}
-              onChange={(e) => setStatus(e.target.value as ClothStatus)}
+            <Box
+              sx={{
+                display: 'grid',
+                gap: theme.spacing(1),
+                gridAutoFlow: 'column',
+              }}
             >
-              <MenuItem value="PENDING">Pending</MenuItem>
-              <MenuItem value="READY">Ready</MenuItem>
-              <MenuItem value="REMOVED">Removed</MenuItem>
-            </TextField>
-            <TextField
-              id="order_number"
-              name="order_number"
-              label="Order number"
-              size="small"
-              variant="standard"
-              value={orderNumber}
-              onChange={(e) => setOrderNUmber(e.target.value)}
-            />
-          </Box>
-        </Collapse>
-        <Tooltip title="Filter list">
-          <IconButton onClick={() => setExpanded((show) => !show)}>
-            <FilterList />
-          </IconButton>
-        </Tooltip>
+              <TextField
+                select
+                fullWidth
+                id="status"
+                name="status"
+                label="Order status"
+                size="small"
+                variant="standard"
+                value={status}
+                defaultValue={status}
+                onChange={(e) => setStatus(e.target.value as ClothStatus)}
+              >
+                <MenuItem value="PENDING">Pending</MenuItem>
+                <MenuItem value="WASHED">Washed</MenuItem>
+                <MenuItem value="REMOVED">Removed</MenuItem>
+              </TextField>
+              <TextField
+                id="order_number"
+                name="order_number"
+                label="Order number"
+                size="small"
+                variant="standard"
+                value={orderNumber}
+                onChange={(e) => setOrderNUmber(e.target.value)}
+              />
+            </Box>
+          </Collapse>
+          <Tooltip title="Filter list">
+            <IconButton
+              onClick={() => {
+                setExpanded((show) => !show);
+                setOrderNUmber(undefined);
+                setStatus(undefined);
+              }}
+            >
+              <FilterList />
+            </IconButton>
+          </Tooltip>
+        </Box>
       </Box>
       {orders.length === 0 ? (
         <Box

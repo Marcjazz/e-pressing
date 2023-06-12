@@ -256,7 +256,15 @@ export default function OrderCard({
 
   return (
     <Box sx={{ width: '100%' }}>
-      <Paper sx={{ width: '100%', mb: 2 }}>
+      <Paper
+        sx={{
+          width: {
+            xs: '90vw',
+            md: '100%',
+          },
+          mb: 2,
+        }}
+      >
         <EnhancedTableToolbar
           handleDelivery={() => {
             handleStatusChange(selectedGroupStatus as ClothStatus, selected);
