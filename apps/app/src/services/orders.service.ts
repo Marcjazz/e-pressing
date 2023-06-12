@@ -45,20 +45,30 @@ export async function getOrders(
         client_phone_number,
       }
     ) => {
-      if (groupOrders.find((_) => _.order_number === order_number)) {
-        return groupOrders.map((order) => ({
+      console.log(groupOrders);
+      const index = groupOrders.findIndex(
+        (_) => _.order_number === order_number
+      );
+      if (index !== -1) {
+        const order = groupOrders[index];
+        groupOrders[index] = {
           ...order,
           cloths: [
             ...order.cloths,
-            { cloth_id: _id, cloth_name, quantity, washing_price, status },
+            {
+              cloth_id: _id,
+              cloth_name,
+              quantity,
+              washing_price,
+              status,
+            },
           ],
-        }));
+        };
       } else
-        return [
+        groupOrders = [
           ...groupOrders,
           {
             order_number,
-            status,
             client_fullname,
             client_phone_number,
             cloths: [
@@ -66,6 +76,7 @@ export async function getOrders(
             ],
           },
         ];
+      return groupOrders;
     },
     [] as IOrderDetails[]
   );
