@@ -75,17 +75,18 @@ export async function createNewOrder(
   db: Database,
   { client_fullname, client_phone_number, cloths }: ICreateOrder
 ) {
+  const orderNumber = `EP${Math.random()
+    .toString(36)
+    .split('.')[1]
+    .toUpperCase()
+    .substring(0, 6)}`;
   const data = await db.collection<PlacedOrder>('placed_orders').insertMany(
     cloths.map((cloth) => ({
       ...cloth,
       client_fullname,
       status: 'PENDING',
       client_phone_number,
-      order_number: `EP${Math.random()
-        .toString(36)
-        .split('.')[1]
-        .toUpperCase()
-        .substring(0, 6)}`,
+      order_number: orderNumber,
     }))
   );
   return data;
@@ -93,9 +94,9 @@ export async function createNewOrder(
 
 export async function changeOrderStatus(
   db: Database,
-  { orderIds, status }: { orderIds: string[]; status: ClothStatus }
+  { orderIds, status }: { orderIds: readonly string[]; status: ClothStatus }
 ) {
   await db
     .collection<PlacedOrder>('placed_orders')
-    .updateMany({ _id: { $in: orderIds } }, { status });
+    .updateMany({ _id: { $in: orderIds } }, { $set: { status } });
 }
