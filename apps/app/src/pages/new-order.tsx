@@ -1,14 +1,31 @@
-import { ICreateCloth } from '@e-pressing/interfaces';
+import { Client, Error, ICreateCloth, Item } from '@e-pressing/interfaces';
 import { Add } from '@mui/icons-material';
-import { Box, Button, IconButton, Tooltip, Typography } from '@mui/material';
+import {
+  Box,
+  Button,
+  IconButton,
+  TextField,
+  Tooltip,
+  Typography,
+} from '@mui/material';
 import { useState } from 'react';
-import InputCard, { Error, Item } from '../components/inputCard';
+import { useNavigate } from 'react-router';
+import { toast } from 'react-toastify';
+import InputCard from '../components/inputCard';
+import { useMongoDB } from '../providers/mongoDB';
+import { createNewOrder } from '../services/orders.service';
 
-export interface INewOrderProps {
+interface INewOrderProps {
   children?: JSX.Element;
 }
 
 function useNewOrder() {
+  const { db } = useMongoDB();
+  const navigate = useNavigate();
+  const [client, setClient] = useState<Client>({
+    client_fullname: '',
+    client_phone_number: '',
+  });
   const [newItems, setNewItems] = useState<Item[]>([]);
 
   const [errors, setErrors] = useState<Error[]>([]);
@@ -18,7 +35,7 @@ function useNewOrder() {
     if (errors.length === 0)
       setNewItems((newItems) => [
         {
-          item_id: newItems.length + 1,
+          item_id: `item-${newItems.length + 1}`,
           value: {
             cloth_name: '',
             quantity: 1,
@@ -29,12 +46,12 @@ function useNewOrder() {
       ]);
   };
 
-  const removeClothHandler = (fake_id: number) => {
+  const removeClothHandler = (fake_id: string) => {
     setNewItems((newItems) => newItems.filter((_) => _.item_id === fake_id));
   };
 
   const updateClothHandler = (
-    fake_id: number,
+    fake_id: string,
     updatedCloth: Partial<ICreateCloth>
   ) => {
     setNewItems((newItems) =>
@@ -47,9 +64,25 @@ function useNewOrder() {
     validtedFields();
   };
 
+  const updateClientHandler = (data: Partial<Client>) => {
+    setClient((client) => ({ ...client, ...data }));
+  };
+
   const validtedFields = () => {
     setErrors([]);
     const newErrors: Error[] = [];
+
+    Object.keys(client).forEach((key) => {
+      const clientKey = key as keyof Client;
+      if (!client[clientKey]) {
+        const newError: Error = {
+          field: clientKey,
+          item_id: clientKey,
+          error: `This field is required !`,
+        };
+        newErrors.push(newError);
+      }
+    });
     newItems.forEach(({ item_id, value: cloth }) => {
       Object.keys(cloth).forEach((key) => {
         const clothKey = key as keyof ICreateCloth;
@@ -70,18 +103,31 @@ function useNewOrder() {
   const sumbitNewOrderHandler = () => {
     const errors = validtedFields();
     if (errors.length === 0) {
-      console.log(newItems.map((_) => _.value));
-      //TODO call api to register new order
+      console.log('hello world');
+      //TODO
+      if (!db) {
+        toast.error('Mongo database was not loaded successfully !!!');
+        return navigate('/');
+      }
+      createNewOrder(db, {
+        client_fullname: 'Kuidja Marco',
+        cloths: newItems.map((_) => _.value),
+        client_phone_number: '+237 652104890',
+      })
+        .then((data) => console.log(data))
+        .catch(toast.error);
     }
   };
 
   return {
     errors,
+    client,
     newItems,
     dispatchers: {
       addClothHandler,
       removeClothHandler,
       updateClothHandler,
+      updateClientHandler,
       sumbitNewOrderHandler,
     },
   };
@@ -89,11 +135,28 @@ function useNewOrder() {
 export default function NewOrder(props: INewOrderProps) {
   const {
     errors,
+    client,
     newItems,
-    dispatchers: { addClothHandler, updateClothHandler, sumbitNewOrderHandler },
+    dispatchers: {
+      addClothHandler,
+      updateClothHandler,
+      updateClientHandler,
+      sumbitNewOrderHandler,
+    },
   } = useNewOrder();
+  const fullnameeError = errors.find(
+    (_) => _.field === 'client_fullname'
+  )?.error;
+  const clientPhoneNumberError = errors.find(
+    (_) => _.field === 'client_phone_number'
+  )?.error;
   return (
-    <Box height={'100%'}>
+    <Box
+      sx={{
+        width: '300px',
+        minWidth: '50vw',
+      }}
+    >
       <Typography variant="h3">New record</Typography>
       <Box
         sx={{
@@ -126,6 +189,34 @@ export default function NewOrder(props: INewOrderProps) {
         >
           submit
         </Button>
+        <TextField
+          id={`client_fullname`}
+          name={`client_fullname`}
+          label="Client fullname"
+          size="small"
+          fullWidth
+          variant="standard"
+          value={client?.client_fullname}
+          helperText={fullnameeError}
+          error={Boolean(fullnameeError)}
+          onChange={(e) =>
+            updateClientHandler({ client_fullname: e.target.value })
+          }
+        />
+        <TextField
+          id={`client_phone_number`}
+          name={`client_phone_number`}
+          label="Client phone number"
+          size="small"
+          fullWidth
+          variant="standard"
+          value={client?.client_phone_number}
+          helperText={clientPhoneNumberError}
+          error={Boolean(clientPhoneNumberError)}
+          onChange={(e) =>
+            updateClientHandler({ client_phone_number: e.target.value })
+          }
+        />
         {newItems.map(({ item_id: fake_id, value }) => (
           <InputCard
             {...value}
