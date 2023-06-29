@@ -8,20 +8,23 @@ export interface ICloth extends ICreateCloth {
   cloth_id: string;
   status: ClothStatus;
 }
-export interface ICreateOrder {
-  cloths: ICreateCloth[];
+export interface IClient {
   client_fullname: string;
   client_phone_number: string;
+}
+export interface ICreateOrder extends IClient {
+  cloths: ICreateCloth[];
+  reception_date: number;
 }
 
 export interface IOrderDetails extends ICreateOrder {
   cloths: ICloth[];
   order_number: string;
 }
-export type Client = Omit<ICreateOrder, 'cloths'>;
+
 export type Error = {
   error: string;
   item_id: string;
-  field: keyof (ICreateCloth & Client);
+  field: keyof (ICreateCloth & IClient);
 };
 export type Item = { item_id: string; value: ICreateCloth };

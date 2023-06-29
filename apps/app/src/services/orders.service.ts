@@ -8,6 +8,7 @@ import {
 export type PlacedOrder = Omit<ICloth, 'cloth_id'> & {
   _id: string;
   order_number: string;
+  reception_date: number;
   client_fullname: string;
   client_phone_number: string;
 };
@@ -41,6 +42,7 @@ export async function getOrders(
         quantity,
         status,
         washing_price,
+        reception_date,
         client_fullname,
         client_phone_number,
       }
@@ -69,6 +71,7 @@ export async function getOrders(
           ...groupOrders,
           {
             order_number,
+            reception_date,
             client_fullname,
             client_phone_number,
             cloths: [
@@ -84,7 +87,7 @@ export async function getOrders(
 
 export async function createNewOrder(
   db: Database,
-  { client_fullname, client_phone_number, cloths }: ICreateOrder
+  { client_fullname, client_phone_number, reception_date, cloths }: ICreateOrder
 ) {
   const orderNumber = `EP${Math.random()
     .toString(36)
@@ -94,6 +97,7 @@ export async function createNewOrder(
   const data = await db.collection<PlacedOrder>('placed_orders').insertMany(
     cloths.map((cloth) => ({
       ...cloth,
+      reception_date,
       client_fullname,
       status: 'PENDING',
       client_phone_number,

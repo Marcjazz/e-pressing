@@ -1,4 +1,4 @@
-import { Client, Error, ICreateCloth, Item } from '@e-pressing/interfaces';
+import { Error, IClient, ICreateCloth, Item } from '@e-pressing/interfaces';
 import { Add } from '@mui/icons-material';
 import {
   Box,
@@ -22,10 +22,13 @@ interface INewOrderProps {
 function useNewOrder() {
   const { db } = useMongoDB();
   const navigate = useNavigate();
-  const [client, setClient] = useState<Client>({
+  const [client, setClient] = useState<IClient>({
     client_fullname: '',
     client_phone_number: '',
   });
+  const [receptionDate, setReceptionDate] = useState(
+    Date.now() + 3 * 24 * 3600 * 1000
+  );
   const [newItems, setNewItems] = useState<Item[]>([
     {
       item_id: `item-1`,
@@ -73,7 +76,7 @@ function useNewOrder() {
     validtedFields();
   };
 
-  const updateClientHandler = (data: Partial<Client>) => {
+  const updateClientHandler = (data: Partial<IClient>) => {
     setClient((client) => ({ ...client, ...data }));
   };
 
@@ -82,7 +85,7 @@ function useNewOrder() {
     const newErrors: Error[] = [];
 
     Object.keys(client).forEach((key) => {
-      const clientKey = key as keyof Client;
+      const clientKey = key as keyof IClient;
       if (!client[clientKey]) {
         const newError: Error = {
           field: clientKey,
@@ -118,6 +121,7 @@ function useNewOrder() {
       }
       createNewOrder(db, {
         ...client,
+        reception_date: receptionDate,
         cloths: newItems.map((_) => _.value),
       })
         .then(() => navigate('/-/orders'))
@@ -129,8 +133,10 @@ function useNewOrder() {
     errors,
     client,
     newItems,
+    receptionDate,
     dispatchers: {
       addClothHandler,
+      setReceptionDate,
       removeClothHandler,
       updateClothHandler,
       updateClientHandler,
@@ -143,8 +149,10 @@ export default function NewOrder(props: INewOrderProps) {
     errors,
     client,
     newItems,
+    receptionDate,
     dispatchers: {
       addClothHandler,
+      setReceptionDate,
       updateClothHandler,
       updateClientHandler,
       sumbitNewOrderHandler,
@@ -223,6 +231,19 @@ export default function NewOrder(props: INewOrderProps) {
           onChange={(e) =>
             updateClientHandler({ client_phone_number: e.target.value })
           }
+        />
+        <TextField
+          id={`reception_date`}
+          name={`reception_date`}
+          label="Reception date"
+          size="small"
+          fullWidth
+          variant="standard"
+          type="datetime-local"
+          value={new Date(receptionDate)}
+          helperText={clientPhoneNumberError}
+          error={Boolean(clientPhoneNumberError)}
+          onChange={(e) => setReceptionDate(new Date(e.target.value).getTime())}
         />
         {newItems.map(({ item_id: fake_id, value }) => (
           <InputCard
