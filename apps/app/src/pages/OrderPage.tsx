@@ -12,17 +12,17 @@ import {
 } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
-import OrderCard from '../components/orderCard';
-import { theme } from '../theme';
+import { toast } from 'react-toastify';
+import Order from '../components/Order';
 import { useMongoDB } from '../providers/mongoDB';
 import { changeOrderStatus, getOrders } from '../services/orders.service';
-import { toast } from 'react-toastify';
+import { theme } from '../theme';
 
 export interface IOrdersProps {
   children?: JSX.Element;
 }
 
-export default function Orders(props: IOrdersProps) {
+export default function OrderPage(props: IOrdersProps) {
   const { db } = useMongoDB();
   const navigate = useNavigate();
   const [orders, setOrders] = useState<IOrderDetails[]>([]);
@@ -164,7 +164,7 @@ export default function Orders(props: IOrdersProps) {
         </Box>
       ) : (
         orders.map((order, index) => (
-          <OrderCard
+          <Order
             handleStatusChange={(status, selected) =>
               handleStatusChange(
                 order.order_number,

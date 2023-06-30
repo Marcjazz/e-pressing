@@ -1,19 +1,19 @@
 import Layout from './layout';
-import NewOrder from '../pages/new-order';
-import Orders from '../pages/orders';
-import LogIn from '../pages/login';
+import OrderFormPage from '../pages/OrderFormPage';
+import OrderPage from '../pages/OrderPage';
+import LogInPage from '../pages/LoginPage';
 
 export const routes = [
   {
     path: '/',
-    element: <LogIn />,
+    element: <LogInPage />,
   },
   {
     path: '/-',
     element: <Layout />,
     children: [
-      { path: 'new', element: <NewOrder /> },
-      { path: 'orders', element: <Orders /> },
+      { path: 'new', element: <OrderFormPage /> },
+      { path: 'orders', element: <OrderPage /> },
     ],
   },
   //   {

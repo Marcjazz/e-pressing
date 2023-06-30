@@ -2,13 +2,13 @@ import { Error, ICreateCloth } from '@e-pressing/interfaces';
 import { Box, TextField, Typography } from '@mui/material';
 import { theme } from '../theme';
 
-interface InputCardProps extends ICreateCloth {
+interface IOrderFormProps extends ICreateCloth {
   errors: Error[];
   textFieldId: string;
   children?: JSX.Element;
   onChangeHandler: (id: string, updatedCloth: Partial<ICreateCloth>) => void;
 }
-export default function InputCard({
+export default function OrderForm({
   errors,
   quantity,
   cloth_name,
@@ -16,7 +16,7 @@ export default function InputCard({
 
   textFieldId,
   onChangeHandler,
-}: InputCardProps) {
+}: IOrderFormProps) {
   const textFieldError = errors.find(
     (_) => _.item_id === textFieldId && _.field === 'cloth_name'
   )?.error;

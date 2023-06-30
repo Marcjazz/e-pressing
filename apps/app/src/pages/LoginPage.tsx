@@ -5,7 +5,7 @@ import { Adb } from '@mui/icons-material';
 import { useNavigate } from 'react-router';
 import { toast } from 'react-toastify';
 
-export default function LogIn() {
+export default function LogInPage() {
   const { logIn, user } = useRealmApp();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');

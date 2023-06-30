@@ -11,7 +11,7 @@ import {
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { toast } from 'react-toastify';
-import InputCard from '../components/inputCard';
+import OrderForm from '../components/OrderForm';
 import { useMongoDB } from '../providers/mongoDB';
 import { createNewOrder } from '../services/orders.service';
 
@@ -144,7 +144,7 @@ function useNewOrder() {
     },
   };
 }
-export default function NewOrder(props: INewOrderProps) {
+export default function OrderFormPage(props: INewOrderProps) {
   const {
     errors,
     client,
@@ -246,7 +246,7 @@ export default function NewOrder(props: INewOrderProps) {
           onChange={(e) => setReceptionDate(new Date(e.target.value).getTime())}
         />
         {newItems.map(({ item_id: fake_id, value }) => (
-          <InputCard
+          <OrderForm
             {...value}
             key={fake_id}
             errors={errors}

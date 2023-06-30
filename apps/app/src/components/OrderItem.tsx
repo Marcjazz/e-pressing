@@ -2,14 +2,14 @@ import { ICloth } from '@e-pressing/interfaces';
 import { Checkbox, TableCell, TableRow, Typography } from '@mui/material';
 import { MouseEvent } from 'react';
 
-export interface IOrderCardItemProps extends ICloth {
+export interface IOrderItemProps extends ICloth {
   children?: JSX.Element;
   labelId: string;
   isItemSelected: boolean;
   handleClick: (event: MouseEvent<unknown>, cloth_id: string) => void;
 }
 
-export default function OrderCardItem({
+export default function OrderItem({
   cloth_id,
   cloth_name,
   quantity,
@@ -19,7 +19,7 @@ export default function OrderCardItem({
   labelId,
   handleClick,
   isItemSelected,
-}: IOrderCardItemProps) {
+}: IOrderItemProps) {
   return (
     <TableRow
       hover

@@ -5,177 +5,30 @@ import {
 } from '@e-pressing/interfaces';
 import {
   Box,
-  Button,
-  Checkbox,
-  Chip,
   Paper,
   Table,
   TableBody,
   TableCell,
   TableContainer,
-  TableHead,
   TablePagination,
   TableRow,
-  Toolbar,
   Typography,
-  alpha,
 } from '@mui/material';
 import { useMemo, useState } from 'react';
 import { theme } from '../theme';
-import OrderCardItem from './orderCardItem';
-
-interface EnhancedTableToolbarProps {
-  numSelected: number;
-  order_number: string;
-  status: ClothStatus;
-  handleDelivery: () => void;
-}
-
-function EnhancedTableToolbar({
-  numSelected,
-  order_number,
-  status,
-
-  handleDelivery,
-}: EnhancedTableToolbarProps) {
-  return (
-    <Toolbar
-      sx={{
-        pl: { sm: 2 },
-        pr: { xs: 1, sm: 1 },
-        ...(numSelected > 0 && {
-          bgcolor: (theme) =>
-            alpha(
-              theme.palette.primary.main,
-              theme.palette.action.activatedOpacity
-            ),
-        }),
-      }}
-    >
-      {numSelected > 0 ? (
-        <Typography
-          sx={{ flex: '1' }}
-          color="inherit"
-          variant="subtitle1"
-          component="div"
-        >
-          {numSelected} selected
-        </Typography>
-      ) : (
-        <Typography
-          sx={{ flex: 1 }}
-          variant="h6"
-          id="tableTitle"
-          component="div"
-        >
-          {order_number}
-        </Typography>
-      )}
-      <Chip
-        label={status}
-        color={
-          status === 'PENDING'
-            ? 'warning'
-            : status === 'REMOVED'
-            ? 'success'
-            : 'info'
-        }
-      />
-      {status !== 'REMOVED' && (
-        <Button
-          sx={{
-            marginLeft: theme.spacing(2),
-          }}
-          onClick={handleDelivery}
-          variant="contained"
-          size="small"
-          disabled={numSelected === 0}
-        >
-          {status === 'PENDING' ? 'update to washed' : 'update to revomed'}
-        </Button>
-      )}
-    </Toolbar>
-  );
-}
+import OrderItem from './OrderItem';
+import { EnhancedTableToolbar } from './common/EnhancedTableToolbar';
+import { EnhancedTableHead } from './common/EnhancedTableHead';
 
 type KeyOfData = keyof ICreateCloth | 'total' | 'cloth_status';
-interface HeadCell {
+export interface HeadCell {
   disablePadding: boolean;
   id: KeyOfData;
   label: string;
   numeric: boolean;
 }
 
-interface EnhancedTableProps {
-  onSelectAllClick: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  numSelected: number;
-  rowCount: number;
-}
-
-function EnhancedTableHead(props: EnhancedTableProps) {
-  const { onSelectAllClick, numSelected, rowCount } = props;
-  const headCells: readonly HeadCell[] = [
-    {
-      id: 'cloth_name',
-      numeric: false,
-      disablePadding: true,
-      label: 'Item description',
-    },
-    {
-      id: 'cloth_status',
-      numeric: false,
-      disablePadding: true,
-      label: 'Status',
-    },
-    {
-      id: 'washing_price',
-      numeric: true,
-      disablePadding: false,
-      label: 'Unit price',
-    },
-    {
-      id: 'quantity',
-      numeric: true,
-      disablePadding: false,
-      label: 'Quantity',
-    },
-    {
-      id: 'total',
-      numeric: true,
-      disablePadding: false,
-      label: 'Total',
-    },
-  ];
-
-  return (
-    <TableHead>
-      <TableRow>
-        <TableCell padding="checkbox">
-          <Checkbox
-            color="primary"
-            indeterminate={numSelected > 0 && numSelected < rowCount}
-            checked={rowCount > 0 && numSelected === rowCount}
-            onChange={onSelectAllClick}
-            inputProps={{
-              'aria-label': 'select all desserts',
-            }}
-          />
-        </TableCell>
-        {headCells.map((headCell) => (
-          <TableCell
-            key={headCell.id}
-            align={headCell.numeric ? 'right' : 'left'}
-            padding={headCell.disablePadding ? 'none' : 'normal'}
-          >
-            {headCell.label}
-          </TableCell>
-        ))}
-      </TableRow>
-    </TableHead>
-  );
-}
-
-export interface IOrderCardItemProps extends IOrderDetails {
+export interface IOrderProps extends IOrderDetails {
   children?: JSX.Element;
   handleStatusChange: (
     status: ClothStatus,
@@ -183,11 +36,11 @@ export interface IOrderCardItemProps extends IOrderDetails {
   ) => void;
 }
 
-export default function OrderCard({
+export default function Order({
   cloths,
   order_number,
   handleStatusChange,
-}: IOrderCardItemProps) {
+}: IOrderProps) {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [selected, setSelected] = useState<readonly string[]>([]);
@@ -298,7 +151,7 @@ export default function OrderCard({
                 const labelId = `enhanced-table-checkbox-${index}`;
 
                 return (
-                  <OrderCardItem
+                  <OrderItem
                     {...cloth}
                     labelId={labelId}
                     handleClick={handleSelect}
