@@ -1,5 +1,14 @@
+import { ICreateCloth } from '@e-pressing/interfaces';
 import { Checkbox, TableCell, TableHead, TableRow } from '@mui/material';
-import { HeadCell } from '../Card';
+
+type KeyOfData = keyof ICreateCloth | 'total' | 'cloth_status';
+export interface HeadCell {
+  disablePadding: boolean;
+  id: KeyOfData;
+  label: string;
+  numeric: boolean;
+}
+
 
 interface EnhancedTableProps {
     onSelectAllClick: (event: React.ChangeEvent<HTMLInputElement>) => void;

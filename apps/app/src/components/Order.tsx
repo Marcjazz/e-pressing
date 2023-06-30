@@ -1,7 +1,6 @@
 import {
   ClothStatus,
-  ICreateCloth,
-  IOrderDetails,
+  IOrderDetails
 } from '@e-pressing/interfaces';
 import {
   Box,
@@ -17,16 +16,8 @@ import {
 import { useMemo, useState } from 'react';
 import { theme } from '../theme';
 import OrderItem from './OrderItem';
-import { EnhancedTableToolbar } from './common/EnhancedTableToolbar';
 import { EnhancedTableHead } from './common/EnhancedTableHead';
-
-type KeyOfData = keyof ICreateCloth | 'total' | 'cloth_status';
-export interface HeadCell {
-  disablePadding: boolean;
-  id: KeyOfData;
-  label: string;
-  numeric: boolean;
-}
+import { EnhancedTableToolbar } from './common/EnhancedTableToolbar';
 
 export interface IOrderProps extends IOrderDetails {
   children?: JSX.Element;
