@@ -14,7 +14,7 @@ export interface IClient {
 }
 export interface ICreateOrder extends IClient {
   cloths: ICreateCloth[];
-  reception_date: number;
+  reception_date: string;
 }
 
 export interface IOrderDetails extends ICreateOrder {
@@ -25,6 +25,19 @@ export interface IOrderDetails extends ICreateOrder {
 export type Error = {
   error: string;
   item_id: string;
-  field: keyof (ICreateCloth & IClient);
+  field: keyof (ICreateCloth & IClient) | 'reception_date';
 };
 export type Item = { item_id: string; value: ICreateCloth };
+
+export interface IStatistics {
+  pending_orders: number;
+  washed_orders: number;
+  removed_orders: number;
+}
+
+export interface IOrder extends Omit<IOrderDetails, 'cloths'> {
+  status: ClothStatus;
+  number_of_cloths: number;
+  client_fullname: string;
+  client_phone_number: string;
+}
