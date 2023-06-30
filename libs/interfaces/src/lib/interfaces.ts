@@ -29,15 +29,26 @@ export type Error = {
 };
 export type Item = { item_id: string; value: ICreateCloth };
 
-export interface IStatistics {
+export interface IStatsOverview {
   pending_orders: number;
   washed_orders: number;
   removed_orders: number;
 }
 
+export interface IStatsSummary {
+  for: string;
+  value: {
+    count: number;
+    amount: number;
+  };
+}
+
 export interface IOrder extends Omit<IOrderDetails, 'cloths'> {
   status: ClothStatus;
-  number_of_cloths: number;
+  created_at: string;
   client_fullname: string;
+  number_of_cloths: number;
   client_phone_number: string;
 }
+
+export type GroupByType = 'day' | 'week' | 'month' | 'year';
