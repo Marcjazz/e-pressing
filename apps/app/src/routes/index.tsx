@@ -1,7 +1,9 @@
 import Layout from './layout';
 import OrderFormPage from '../pages/OrderFormPage';
-import OrderPage from '../pages/OrderPage';
+import OrdersPage from '../pages/OrdersPage';
 import LogInPage from '../pages/LoginPage';
+import OrderPage from '../pages/OrderPage';
+import { Navigate } from 'react-router';
 
 export const routes = [
   {
@@ -9,15 +11,16 @@ export const routes = [
     element: <LogInPage />,
   },
   {
-    path: '/-',
+    path: 'orders',
     element: <Layout />,
     children: [
+      { path: '', element: <OrdersPage /> },
       { path: 'new', element: <OrderFormPage /> },
-      { path: 'orders', element: <OrderPage /> },
+      { path: ':order_number', element: <OrderPage /> },
     ],
   },
-  //   {
-  //     path: '*',
-  //     element: <Navigate to="/" />,
-  //   },
+  {
+    path: '*',
+    element: <Navigate to="/" />,
+  },
 ];

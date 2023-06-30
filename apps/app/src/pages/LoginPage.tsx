@@ -13,7 +13,7 @@ export default function LogInPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (user) navigate('/-/orders');
+    if (user) navigate('/orders');
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
