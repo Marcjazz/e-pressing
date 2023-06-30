@@ -15,7 +15,7 @@ import OrderForm from '../components/OrderForm';
 import { useMongoDB } from '../providers/mongoDB';
 import { createNewOrder } from '../services/orders.service';
 
-interface INewOrderProps {
+interface IOrderFormPageProps {
   children?: JSX.Element;
 }
 
@@ -26,9 +26,7 @@ function useNewOrder() {
     client_fullname: '',
     client_phone_number: '',
   });
-  const [receptionDate, setReceptionDate] = useState(
-    Date.now() + 3 * 24 * 3600 * 1000
-  );
+  const [receptionDate, setReceptionDate] = useState<string>('');
   const [newItems, setNewItems] = useState<Item[]>([
     {
       item_id: `item-1`,
@@ -78,12 +76,26 @@ function useNewOrder() {
 
   const updateClientHandler = (data: Partial<IClient>) => {
     setClient((client) => ({ ...client, ...data }));
+    const clientErrors = validateClientFieds(data);
+    const newErrors: Error[] = [];
+    clientErrors.forEach((err) =>
+      errors.find((_) => _.item_id === err.item_id) ? null : newErrors.push(err)
+    );
+    setErrors([
+      ...errors.filter((_) =>
+        Object.keys(data).find((key) => key !== _.item_id)
+      ),
+      ...newErrors,
+    ]);
   };
 
-  const validtedFields = () => {
-    setErrors([]);
-    const newErrors: Error[] = [];
+  const receptionDateHandler = (date: string) => {
+    setReceptionDate(date);
+    setErrors(errors.filter((_) => _.item_id === 'reception_date'));
+  };
 
+  const validateClientFieds = (client: Partial<IClient>) => {
+    const newErrors: Error[] = [];
     Object.keys(client).forEach((key) => {
       const clientKey = key as keyof IClient;
       if (!client[clientKey]) {
@@ -95,6 +107,19 @@ function useNewOrder() {
         newErrors.push(newError);
       }
     });
+    return newErrors;
+  };
+
+  const validtedFields = () => {
+    setErrors([]);
+    const newErrors: Error[] = validateClientFieds(client);
+
+    if (!receptionDate)
+      newErrors.push({
+        field: 'reception_date',
+        item_id: 'reception_date',
+        error: 'This field is required !',
+      });
     newItems.forEach(({ item_id, value: cloth }) => {
       Object.keys(cloth).forEach((key) => {
         const clothKey = key as keyof ICreateCloth;
@@ -124,7 +149,7 @@ function useNewOrder() {
         reception_date: receptionDate,
         cloths: newItems.map((_) => _.value),
       })
-        .then(() => navigate('/-/orders'))
+        .then(() => navigate('/orders'))
         .catch(toast.error);
     }
   };
@@ -136,25 +161,25 @@ function useNewOrder() {
     receptionDate,
     dispatchers: {
       addClothHandler,
-      setReceptionDate,
       removeClothHandler,
       updateClothHandler,
       updateClientHandler,
+      receptionDateHandler,
       sumbitNewOrderHandler,
     },
   };
 }
-export default function OrderFormPage(props: INewOrderProps) {
+export default function OrderFormPage(props: IOrderFormPageProps) {
   const {
     errors,
-    client,
     newItems,
     receptionDate,
+    client: { client_fullname, client_phone_number },
     dispatchers: {
       addClothHandler,
-      setReceptionDate,
       updateClothHandler,
       updateClientHandler,
+      receptionDateHandler,
       sumbitNewOrderHandler,
     },
   } = useNewOrder();
@@ -163,6 +188,9 @@ export default function OrderFormPage(props: INewOrderProps) {
   )?.error;
   const clientPhoneNumberError = errors.find(
     (_) => _.field === 'client_phone_number'
+  )?.error;
+  const receptionDateError = errors.find(
+    (_) => _.field === 'reception_date'
   )?.error;
 
   return (
@@ -211,7 +239,7 @@ export default function OrderFormPage(props: INewOrderProps) {
           size="small"
           fullWidth
           variant="standard"
-          value={client?.client_fullname}
+          value={client_fullname}
           helperText={fullnameeError}
           error={Boolean(fullnameeError)}
           onChange={(e) =>
@@ -225,11 +253,11 @@ export default function OrderFormPage(props: INewOrderProps) {
           size="small"
           fullWidth
           variant="standard"
-          value={client?.client_phone_number}
+          value={client_phone_number}
           helperText={clientPhoneNumberError}
           error={Boolean(clientPhoneNumberError)}
           onChange={(e) =>
-            updateClientHandler({ client_phone_number: e.target.value })
+            updateClientHandler({ client_phone_number: e.target.value.slice(0, 9) })
           }
         />
         <TextField
@@ -239,11 +267,18 @@ export default function OrderFormPage(props: INewOrderProps) {
           size="small"
           fullWidth
           variant="standard"
-          type="datetime-local"
-          value={new Date(receptionDate)}
-          helperText={clientPhoneNumberError}
-          error={Boolean(clientPhoneNumberError)}
-          onChange={(e) => setReceptionDate(new Date(e.target.value).getTime())}
+          type="date"
+          value={
+            receptionDate
+              ? receptionDate
+              : new Date(Date.now() + 3 * 24 * 3600 * 1000).toLocaleDateString()
+          }
+          helperText={receptionDateError}
+          error={Boolean(receptionDateError)}
+          onChange={(e) => {
+            const date = e.target.value;
+            if (new Date(date) > new Date()) receptionDateHandler(date);
+          }}
         />
         {newItems.map(({ item_id: fake_id, value }) => (
           <OrderForm
