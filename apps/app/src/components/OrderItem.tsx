@@ -1,12 +1,24 @@
-import { ICloth } from '@e-pressing/interfaces';
-import { Checkbox, TableCell, TableRow, Typography } from '@mui/material';
-import { MouseEvent } from 'react';
+import { ClothStatus, ICloth } from '@e-pressing/interfaces';
+import { Done, DoneAll, Schedule } from '@mui/icons-material';
+import {
+  Box,
+  Button,
+  Checkbox,
+  Collapse,
+  Divider,
+  ListItemText,
+  Tooltip,
+  Typography,
+  capitalize,
+} from '@mui/material';
+import { useState } from 'react';
 
 export interface IOrderItemProps extends ICloth {
   children?: JSX.Element;
-  labelId: string;
-  isItemSelected: boolean;
-  handleClick: (event: MouseEvent<unknown>, cloth_id: string) => void;
+  selected: string[];
+  handleSelect: (clothId: string) => void;
+  handleExpandedNumber: (expanded: boolean) => void;
+  handleStatusChange: (clothId: string, newStatus: ClothStatus) => void;
 }
 
 export default function OrderItem({
@@ -16,52 +28,81 @@ export default function OrderItem({
   status,
   washing_price,
 
-  labelId,
-  handleClick,
-  isItemSelected,
+  selected,
+  handleSelect,
+  handleStatusChange,
+  handleExpandedNumber,
 }: IOrderItemProps) {
+  const [expanded, setExpanded] = useState(false);
+  const newStatus = status === 'PENDING' ? 'WASHED' : 'REMOVED';
+
   return (
-    <TableRow
-      hover
-      onClick={(event) => handleClick(event, cloth_id)}
-      role="checkbox"
-      aria-checked={isItemSelected}
-      tabIndex={-1}
-      key={labelId}
-      selected={isItemSelected}
-      sx={{ cursor: 'pointer' }}
-    >
-      <TableCell padding="checkbox">
-        <Checkbox
-          color="primary"
-          checked={isItemSelected}
-          inputProps={{
-            'aria-labelledby': labelId,
-          }}
-        />
-      </TableCell>
-      <TableCell component="th" id={labelId} scope="row" padding="none">
-        {cloth_name}
-      </TableCell>
-      <TableCell align="left" padding="none">
-        <Typography
-         variant='subtitle1'
+    <Box>
+      <Box sx={{ display: 'flex' }}>
+        <Tooltip title={status}>
+          {status === 'PENDING' ? (
+            <Schedule fontSize="large" sx={{ color: '#ed6c02' }} />
+          ) : status === 'WASHED' ? (
+            <Done fontSize="large" sx={{ color: '#3498db' }} />
+          ) : (
+            <DoneAll fontSize="large" sx={{ color: '#00ba88' }} />
+          )}
+        </Tooltip>
+        <Box
           sx={{
-            textTransform: 'capitalize',
-            color:
-              status === 'PENDING'
-                ? '#ed6c02'
-                : status === 'REMOVED'
-                ? '#00ba88'
-                : '#3498db',
+            display: 'grid',
+            gridTemplateColumns: '1fr auto',
+            width: '100%',
           }}
         >
-          {status.toLowerCase()}
-        </Typography>
-      </TableCell>
-      <TableCell align="right">{washing_price}</TableCell>
-      <TableCell align="right">{quantity}</TableCell>
-      <TableCell align="right">{washing_price * quantity}</TableCell>
-    </TableRow>
+          <Typography
+            onClick={() => {
+              setExpanded(!expanded);
+              handleExpandedNumber(!expanded);
+            }}
+            variant="subtitle1"
+            fontWeight="bold"
+            padding={1}
+          >
+            {`${capitalize(cloth_name).slice(0, 25)}...`}
+          </Typography>
+          {!expanded && (
+            <Checkbox
+              sx={{ justifySelf: 'end' }}
+              onClick={() => handleSelect(cloth_id)}
+              color="primary"
+              checked={selected.includes(cloth_id)}
+              inputProps={{
+                'aria-labelledby': cloth_id,
+              }}
+            />
+          )}
+        </Box>
+      </Box>
+      <Divider />
+      <Collapse
+        timeout="auto"
+        unmountOnExit
+        in={expanded}
+        orientation="vertical"
+      >
+        <ListItemText primary={'Description'} secondary={cloth_name} />
+        <Box sx={{ display: 'flex' }}>
+          <ListItemText primary={'Washing price'} secondary={washing_price} />
+          <ListItemText primary={'Quantity'} secondary={quantity} />
+        </Box>
+        <Box sx={{ display: 'flex', alignItems: 'end' }}>
+          <ListItemText primary={'Status'} secondary={status} />
+          <Button
+            size="small"
+            variant="contained"
+            sx={{ height: 'fit-content' }}
+            onClick={() => handleStatusChange(cloth_id, newStatus)}
+          >
+            {newStatus}
+          </Button>
+        </Box>
+      </Collapse>
+    </Box>
   );
 }

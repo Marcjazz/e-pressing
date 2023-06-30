@@ -1,181 +1,160 @@
 import { ClothStatus, IOrderDetails } from '@e-pressing/interfaces';
-import { FilterList } from '@mui/icons-material';
+import { Done, DoneAll, Schedule } from '@mui/icons-material';
 import {
   Box,
   Button,
-  Collapse,
-  IconButton,
-  MenuItem,
-  TextField,
   Tooltip,
-  Typography,
+  Typography
 } from '@mui/material';
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router';
+import { useNavigate, useParams } from 'react-router';
 import { toast } from 'react-toastify';
-import Order from '../components/Order';
+import OrderItem from '../components/OrderItem';
 import { useMongoDB } from '../providers/mongoDB';
-import { changeOrderStatus, getOrders } from '../services/orders.service';
+import { changeOrderStatus, getOrder } from '../services/orders.service';
 import { theme } from '../theme';
 
-export interface IOrdersProps {
+export interface IOrderPageProps {
   children?: JSX.Element;
 }
 
-export default function OrderPage(props: IOrdersProps) {
+export default function OrderPage(props: IOrderPageProps) {
   const { db } = useMongoDB();
   const navigate = useNavigate();
-  const [orders, setOrders] = useState<IOrderDetails[]>([]);
+  const { order_number } = useParams();
 
-  const [expanded, setExpanded] = useState(false);
-
-  const [status, setStatus] = useState<ClothStatus>();
-  const [orderNumber, setOrderNUmber] = useState<string>();
+  const [
+    { cloths, reception_date, client_fullname, client_phone_number },
+    setOrder,
+  ] = useState<IOrderDetails>({
+    reception_date: new Date().toLocaleDateString(),
+    client_phone_number: '',
+    client_fullname: '',
+    order_number: '',
+    cloths: [],
+  });
 
   useEffect(() => {
     if (!db) {
       toast.error('Mongo database was not loaded successfully !!!');
       return navigate('/');
     }
-    getOrders(db, { status, order_number: orderNumber })
-      .then(setOrders)
-      .catch(toast.error);
+    if (order_number)
+      getOrder(db, order_number)
+        .then((order) => (order ? setOrder(order) : null))
+        .catch(toast.error);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [status, orderNumber]);
+  }, [order_number]);
 
-  const handleStatusChange = (
-    orderNumber: string,
-    selected: readonly string[],
-    newStatus: ClothStatus
-  ) => {
+  const handleStatusChange = (selected: string[], newStatus: ClothStatus) => {
     if (!db) {
       toast.error('Mongo database was not loaded successfully !!!');
       return navigate('/');
     }
-    changeOrderStatus(db, { orderIds: selected, status: newStatus })
-      .then(() => {
-        setOrders((orders) =>
-          orders.map((order) =>
-            order.order_number === orderNumber
-              ? {
-                  ...order,
-                  cloths: order.cloths.map((cloth) =>
-                    selected.includes(cloth.cloth_id)
-                      ? { ...cloth, status: newStatus }
-                      : cloth
-                  ),
-                }
-              : order
-          )
-        );
+    if (order_number)
+      changeOrderStatus(db, {
+        clothIds: selected,
+        status: newStatus,
+        order_number,
       })
-      .catch((error) => toast.error(error));
+        .then(() => {
+          setOrder((order) => ({
+            ...order,
+            cloths: order.cloths.map((cloth) =>
+              selected.includes(cloth.cloth_id)
+                ? { ...cloth, status: newStatus }
+                : cloth
+            ),
+          }));
+        })
+        .catch((error) => toast.error(error));
+  };
+  const status = cloths.find((_) => _.status === 'PENDING')
+    ? 'PENDING'
+    : cloths.find((_) => _.status === 'WASHED')
+    ? 'WASHED'
+    : 'REMOVED';
+
+  const [expandedNumber, setExpandedumber] = useState(0);
+  const [selected, setSelected] = useState<string[]>([]);
+
+  const handleSelect = (clothId: string) => {
+    const isSelected = selected.includes(clothId);
+    if (isSelected) {
+      setSelected(selected.filter((_) => _ !== clothId));
+    } else {
+      setSelected([...selected, clothId]);
+    }
   };
 
   return (
-    <Box sx={{ minWidth: '50vw', display: 'grid', gridAutoFlow: 'row' }}>
-      <Box
-        sx={{
-          display: 'grid',
-          gridTemplateColumns: {
-            sm: '1fr auto',
-            xs: 'auto',
-          },
-        }}
-      >
-        <Typography variant="h4">All recorded cloths</Typography>
-        <Box
-          sx={{
-            display: 'grid',
-            justifySelf: 'end',
-            padding: 1,
-            gridTemplateColumns: '1fr auto',
-          }}
-        >
-          <Collapse
-            timeout="auto"
-            unmountOnExit
-            in={expanded}
-            orientation="horizontal"
-          >
-            <Box
-              sx={{
-                display: 'grid',
-                gap: theme.spacing(1),
-                gridAutoFlow: 'column',
-              }}
-            >
-              <TextField
-                select
-                fullWidth
-                id="status"
-                name="status"
-                label="Order status"
-                size="small"
-                variant="standard"
-                value={status}
-                defaultValue={status}
-                onChange={(e) => setStatus(e.target.value as ClothStatus)}
-              >
-                <MenuItem value="PENDING">Pending</MenuItem>
-                <MenuItem value="WASHED">Washed</MenuItem>
-                <MenuItem value="REMOVED">Removed</MenuItem>
-              </TextField>
-              <TextField
-                id="order_number"
-                name="order_number"
-                label="Order number"
-                size="small"
-                variant="standard"
-                value={orderNumber}
-                onChange={(e) => setOrderNUmber(e.target.value)}
-              />
-            </Box>
-          </Collapse>
-          <Tooltip title="Filter list">
-            <IconButton
-              onClick={() => {
-                setExpanded((show) => !show);
-                setOrderNUmber(undefined);
-                setStatus(undefined);
-              }}
-            >
-              <FilterList />
-            </IconButton>
-          </Tooltip>
+    <Box
+      sx={{
+        minWidth: '300px',
+        width: '50vw',
+        display: 'grid',
+        height: '80vh',
+        gridTemplateRows: 'auto 1fr auto',
+        gap: theme.spacing(1),
+      }}
+    >
+      <Box alignItems="flex-start" sx={{ gap: theme.spacing(1) }}>
+        <Box sx={{ display: 'grid', textAlign: 'center' }}>
+          <div style={{ justifySelf: 'center' }}>
+            <Tooltip title={status}>
+              {status === 'PENDING' ? (
+                <Schedule sx={{ color: '#ed6c02', fontSize: '50px' }} />
+              ) : status === 'WASHED' ? (
+                <Done sx={{ color: '#3498db', fontSize: '50px' }} />
+              ) : (
+                <DoneAll sx={{ color: '#00ba88', fontSize: '50px' }} />
+              )}
+            </Tooltip>
+          </div>
+          <Typography variant="caption">{status}</Typography>
+        </Box>
+        <Box sx={{ textAlign: 'center' }}>
+          <Typography variant="h6">{order_number}</Typography>
+          <Typography variant="body2">
+            {` ${client_fullname}, ${client_phone_number}`}
+          </Typography>
+          <Typography variant="body2" color="text.primary">
+            <b>Due date:</b>
+            {` ${new Date(reception_date).toDateString()}`}
+          </Typography>
         </Box>
       </Box>
-      {orders.length === 0 ? (
-        <Box
-          sx={{
-            width: '300px',
-            minWidth: '60vw',
-            display: 'grid',
-            gridAutoFlow: 'row',
-            gap: theme.spacing(2),
-            justifySelf: 'center',
-            padding: theme.spacing(2),
-          }}
-        >
-          <Typography variant="h6">No order is registered yet !</Typography>
-          <Button variant="contained" onClick={() => navigate('/-/new')}>
-            new order
-          </Button>
-        </Box>
-      ) : (
-        orders.map((order, index) => (
-          <Order
-            handleStatusChange={(status, selected) =>
-              handleStatusChange(
-                order.order_number,
-                selected,
-                status === 'PENDING' ? 'WASHED' : 'REMOVED'
-              )
-            }
+      <div>
+        {cloths.map((order, index) => (
+          <OrderItem
             key={index}
             {...order}
+            selected={selected}
+            handleSelect={handleSelect}
+            handleExpandedNumber={(expanded) =>
+              setExpandedumber((count) => (expanded ? ++count : --count))
+            }
+            handleStatusChange={(clothId, newStatus) =>
+              handleStatusChange([clothId], newStatus)
+            }
           />
-        ))
+        ))}
+      </div>
+      {order_number && expandedNumber === 0 && (
+        <Button
+          variant="contained"
+          size="small"
+          sx={{ width: '50%', justifySelf: 'center' }}
+          disabled={selected.length === 0}
+          onClick={() =>
+            handleStatusChange(
+              selected,
+              status === 'PENDING' ? 'WASHED' : 'REMOVED'
+            )
+          }
+        >
+          {status === 'PENDING' ? 'WASHED' : 'REMOVED'}
+        </Button>
       )}
     </Box>
   );
