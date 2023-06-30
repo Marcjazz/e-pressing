@@ -5,6 +5,7 @@ import {
   IOrder,
   IOrderDetails,
 } from '@e-pressing/interfaces';
+import { toast } from 'react-toastify';
 
 export interface IPlacedOrder
   extends Omit<IOrder, 'status' | 'number_of_cloths'> {
@@ -77,9 +78,25 @@ export async function createNewOrder(
 
 export async function changeOrderStatus(
   db: Database,
-  { orderIds, status }: { orderIds: readonly string[]; status: ClothStatus }
+  {
+    clothIds,
+    status,
+    order_number,
+  }: { order_number: string; clothIds: readonly string[]; status: ClothStatus }
 ) {
-  await db
+  const order = await db
     .collection<IPlacedOrder>('placed_orders')
-    .updateMany({ _id: { $in: orderIds } }, { $set: { status } });
+    .findOne({ order_number });
+  console.log(order);
+  if (!order) return toast.error('Order not found !!!');
+  await db.collection<IPlacedOrder>('placed_orders').updateMany(
+    { order_number },
+    {
+      $set: {
+        cloths: order.cloths.map((cloth) =>
+          clothIds.includes(cloth.cloth_id) ? { ...cloth, status } : cloth
+        ),
+      },
+    }
+  );
 }
