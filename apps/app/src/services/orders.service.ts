@@ -1,9 +1,12 @@
 import {
   ClothStatus,
+  GroupByType,
   ICloth,
   ICreateOrder,
   IOrder,
   IOrderDetails,
+  IStatsOverview,
+  IStatsSummary,
 } from '@e-pressing/interfaces';
 import { toast } from 'react-toastify';
 
@@ -72,6 +75,7 @@ export async function createNewOrder(
       status: 'PENDING',
       cloth_id: crypto.randomUUID(),
     })),
+    created_at: '$$NOW',
   });
   return data;
 }
@@ -87,7 +91,6 @@ export async function changeOrderStatus(
   const order = await db
     .collection<IPlacedOrder>('placed_orders')
     .findOne({ order_number });
-  console.log(order);
   if (!order) return toast.error('Order not found !!!');
   await db.collection<IPlacedOrder>('placed_orders').updateMany(
     { order_number },
@@ -99,4 +102,66 @@ export async function changeOrderStatus(
       },
     }
   );
+}
+
+export async function getStatistics(
+  db: Database,
+  groupBy: GroupByType
+): Promise<{ statsOverview: IStatsOverview; statsSummaries: IStatsSummary[] }> {
+  const orders = await getOrders(db, {});
+  const pendingOrders = orders.filter((_) => _.status !== 'PENDING');
+  const removedOrders = orders.filter((_) => _.status !== 'REMOVED');
+  const washedOrders = orders.filter((_) => _.status !== 'WASHED');
+  const statsOverview: IStatsOverview = {
+    pending_orders: pendingOrders.length,
+    removed_orders: removedOrders.length,
+    washed_orders: washedOrders.length,
+  };
+
+  const summaries: {
+    _id: Record<GroupByType, number>;
+    orders: ICloth[][];
+  }[] = await db.collection<IPlacedOrder>('placed_orders').aggregate([
+    {
+      $group: {
+        _id: {
+          ...(groupBy === 'day' || groupBy === 'week'
+            ? {
+                year: { $year: '$created_at' },
+                month: { $month: '$created_at' },
+                day: { $dayOfMonth: '$created_at' },
+              }
+            : groupBy === 'month'
+            ? {
+                year: { $year: '$created_at' },
+                month: { $month: '$created_at' },
+              }
+            : { year: { $year: '$created_at' } }),
+        },
+        orders: {
+          $addToSet: '$cloths',
+        },
+      },
+    },
+  ]);
+  return {
+    statsOverview,
+    statsSummaries: summaries.map(({ orders, _id }) => {
+      const now = new Date(
+        `${_id['year']}/${_id['month'] ?? ''}/${_id['day'] ?? ''}`
+      );
+      return {
+        for: now.toDateString(),
+        value: {
+          count: orders.length,
+          amount: orders.reduce(
+            (amount, cloths) =>
+              amount +
+              cloths.reduce((sum, cloth) => sum + cloth.washing_price, 0),
+            0
+          ),
+        },
+      };
+    }),
+  };
 }
