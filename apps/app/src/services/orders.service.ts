@@ -2,16 +2,15 @@ import {
   ClothStatus,
   ICloth,
   ICreateOrder,
+  IOrder,
   IOrderDetails,
 } from '@e-pressing/interfaces';
 
-export type PlacedOrder = Omit<ICloth, 'cloth_id'> & {
+export interface IPlacedOrder
+  extends Omit<IOrder, 'status' | 'number_of_cloths'> {
   _id: string;
-  order_number: string;
-  reception_date: number;
-  client_fullname: string;
-  client_phone_number: string;
-};
+  cloths: ICloth[];
+}
 type Database = Realm.Services.MongoDBDatabase;
 
 export async function getOrders(
@@ -20,9 +19,9 @@ export async function getOrders(
     status?: ClothStatus;
     order_number?: string;
   }
-) {
+): Promise<IOrder[]> {
   const orders = await db
-    .collection<PlacedOrder>('placed_orders')
+    .collection<IPlacedOrder>('placed_orders')
     .find(
       filter.order_number && filter.status
         ? filter
@@ -32,57 +31,25 @@ export async function getOrders(
         ? { status: filter.status }
         : {}
     );
-  return orders?.reduce(
-    (
-      groupOrders,
-      {
-        _id,
-        cloth_name,
-        order_number,
-        quantity,
-        status,
-        washing_price,
-        reception_date,
-        client_fullname,
-        client_phone_number,
-      }
-    ) => {
-      console.log(groupOrders);
-      const index = groupOrders.findIndex(
-        (_) => _.order_number === order_number
-      );
-      if (index !== -1) {
-        const order = groupOrders[index];
-        groupOrders[index] = {
-          ...order,
-          cloths: [
-            ...order.cloths,
-            {
-              cloth_id: _id,
-              cloth_name,
-              quantity,
-              washing_price,
-              status,
-            },
-          ],
-        };
-      } else
-        groupOrders = [
-          ...groupOrders,
-          {
-            order_number,
-            reception_date,
-            client_fullname,
-            client_phone_number,
-            cloths: [
-              { cloth_id: _id, cloth_name, washing_price, quantity, status },
-            ],
-          },
-        ];
-      return groupOrders;
-    },
-    [] as IOrderDetails[]
-  );
+  return orders.map(({ cloths, ...order }) => ({
+    ...order,
+    status: cloths.find((_) => _.status === 'PENDING')
+      ? 'PENDING'
+      : cloths.find((_) => _.status === 'WASHED')
+      ? 'WASHED'
+      : 'REMOVED',
+    number_of_cloths: cloths.length,
+  }));
+}
+
+export async function getOrder(
+  db: Database,
+  order_number: string
+): Promise<IOrderDetails | null> {
+  const order = await db
+    .collection<IPlacedOrder>('placed_orders')
+    .findOne({ order_number });
+  return order;
 }
 
 export async function createNewOrder(
@@ -94,16 +61,17 @@ export async function createNewOrder(
     .split('.')[1]
     .toUpperCase()
     .substring(0, 6)}`;
-  const data = await db.collection<PlacedOrder>('placed_orders').insertMany(
-    cloths.map((cloth) => ({
+  const data = await db.collection<IPlacedOrder>('placed_orders').insertOne({
+    reception_date,
+    client_fullname,
+    client_phone_number,
+    order_number: orderNumber,
+    cloths: cloths.map((cloth) => ({
       ...cloth,
-      reception_date,
-      client_fullname,
       status: 'PENDING',
-      client_phone_number,
-      order_number: orderNumber,
-    }))
-  );
+      cloth_id: crypto.randomUUID(),
+    })),
+  });
   return data;
 }
 
@@ -112,6 +80,6 @@ export async function changeOrderStatus(
   { orderIds, status }: { orderIds: readonly string[]; status: ClothStatus }
 ) {
   await db
-    .collection<PlacedOrder>('placed_orders')
+    .collection<IPlacedOrder>('placed_orders')
     .updateMany({ _id: { $in: orderIds } }, { $set: { status } });
 }
