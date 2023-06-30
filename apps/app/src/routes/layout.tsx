@@ -12,11 +12,12 @@ import Toolbar from '@mui/material/Toolbar';
 import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import * as React from 'react';
-import { useIntl } from 'react-intl';
 import { Outlet, useNavigate } from 'react-router';
 import { theme } from '../theme';
+import { useRealmApp } from '../providers/realm';
 
 function ResponsiveAppBar() {
+  const { logOut } = useRealmApp();
   const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(
     null
   );
@@ -40,15 +41,10 @@ function ResponsiveAppBar() {
   };
 
   const navigate = useNavigate();
-  const { formatMessage } = useIntl();
   const pages = [
-    { route: 'dashboard', name: formatMessage({ id: 'dashboard' }) },
-    { route: '/-/new', name: formatMessage({ id: 'recordOrder' }) },
-    { route: '/-/orders', name: formatMessage({ id: 'serveOrder' }) },
-  ];
-  const settings = [
-    { route: '/-/accounts', name: formatMessage({ id: 'manageAccounts' }) },
-    { route: '/-/logout', name: formatMessage({ id: 'logout' }) },
+    { route: '/orders/dashboard', name: 'Dashboard' },
+    { route: '/orders/new', name: 'New order' },
+    { route: '/orders', name: 'Placed orders' },
   ];
 
   return (
@@ -180,17 +176,9 @@ function ResponsiveAppBar() {
                 open={Boolean(anchorElUser)}
                 onClose={handleCloseUserMenu}
               >
-                {settings.map(({ name, route }, i) => (
-                  <MenuItem
-                    key={i}
-                    onClick={() => {
-                      handleCloseUserMenu();
-                      navigate(route);
-                    }}
-                  >
-                    <Typography textAlign="center">{name}</Typography>
-                  </MenuItem>
-                ))}
+                <MenuItem onClick={() => logOut()}>
+                  <Typography textAlign="center">{'Log out'}</Typography>
+                </MenuItem>
               </Menu>
             </Box>
           </Toolbar>
