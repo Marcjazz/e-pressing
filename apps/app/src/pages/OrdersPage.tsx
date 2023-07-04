@@ -1,16 +1,12 @@
 import { ClothStatus, IOrder } from '@e-pressing/interfaces';
-import { Done, DoneAll, FilterList, Schedule } from '@mui/icons-material';
+import { FilterList } from '@mui/icons-material';
 import {
   Box,
   Button,
   Collapse,
   IconButton,
   List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
   MenuItem,
-  Paper,
   TextField,
   Tooltip,
   Typography,
@@ -18,6 +14,7 @@ import {
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { toast } from 'react-toastify';
+import { OrderCard } from '../components/OrderCard';
 import { useMongoDB } from '../providers/mongoDB';
 import { getOrders } from '../services/orders.service';
 import { theme } from '../theme';
@@ -132,72 +129,16 @@ export default function OrdersPage(props: IOrdersPageProps) {
         </Box>
       ) : (
         <List
-          sx={{ width: '100%', maxWidth: 360, bgcolor: 'background.paper' }}
+          sx={{
+            gap: 2,
+            width: '100%',
+            display: 'grid',
+            bgcolor: 'background.paper',
+          }}
         >
-          {orders.map(
-            (
-              {
-                client_fullname,
-                client_phone_number,
-                number_of_cloths,
-                order_number,
-                reception_date,
-                status,
-              },
-              index
-            ) => (
-              <Paper onClick={() => navigate(`/orders/${order_number}`)}>
-                <ListItem
-                  key={index}
-                  alignItems="flex-start"
-                  sx={{ gap: theme.spacing(1) }}
-                >
-                  <ListItemIcon sx={{ display: 'grid' }}>
-                    <div style={{ justifySelf: 'center' }}>
-                      <Tooltip title={status}>
-                        {status === 'PENDING' ? (
-                          <Schedule
-                            fontSize="large"
-                            sx={{ color: '#ed6c02' }}
-                          />
-                        ) : status === 'WASHED' ? (
-                          <Done sx={{ color: '#00ba88' }} />
-                        ) : (
-                          <DoneAll sx={{ color: '#3498db' }} />
-                        )}
-                      </Tooltip>
-                    </div>
-                    <Typography variant="caption">{status}</Typography>
-                  </ListItemIcon>
-                  <ListItemText
-                    primary={
-                      <Typography variant="h6">{order_number}</Typography>
-                    }
-                    secondary={
-                      <>
-                        <div>
-                          <Typography
-                            sx={{ display: 'inline' }}
-                            component="span"
-                            variant="body1"
-                            color="text.primary"
-                          >
-                            {`${number_of_cloths} items, `}
-                          </Typography>
-                          <b>Due date:</b>
-                          {` ${new Date(reception_date).toDateString()}, `}
-                        </div>
-                        <div>
-                          <b>Client:</b>
-                          {` ${client_fullname}, ${client_phone_number}`}
-                        </div>
-                      </>
-                    }
-                  />
-                </ListItem>
-              </Paper>
-            )
-          )}
+          {orders.map((order, index) => (
+            <OrderCard key={index} {...order} />
+          ))}
         </List>
       )}
     </Box>
