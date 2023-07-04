@@ -46,7 +46,7 @@ function Layout({ children }: ILayoutProps) {
 
   const navigate = useNavigate();
   if (!user) navigate('/');
-  
+
   const pages = [
     { route: '/dashboard', name: 'Dashboard' },
     { route: '/orders/new', name: 'New order' },
@@ -163,10 +163,7 @@ function Layout({ children }: ILayoutProps) {
             <Box sx={{ flexGrow: 0 }}>
               <Tooltip title="Open settings">
                 <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                  <Avatar
-                    alt={user?.profile.email ?? 'Remy Sharp'}
-                    src="/static/images/avatar/2.jpg"
-                  />
+                  <Avatar />
                 </IconButton>
               </Tooltip>
               <Menu
