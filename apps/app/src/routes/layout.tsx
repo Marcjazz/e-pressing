@@ -59,10 +59,11 @@ function Layout({ children }: ILayoutProps) {
         height: '100vh',
         width: '100vw',
         display: 'grid',
+        paddingTop: 10,
         gridTemplateRows: 'auto 1fr',
       }}
     >
-      <AppBar position="static">
+      <AppBar position="fixed">
         <Container maxWidth="xl">
           <Toolbar disableGutters>
             <AdbIcon sx={{ display: { xs: 'none', md: 'flex' }, mr: 1 }} />
