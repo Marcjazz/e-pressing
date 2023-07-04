@@ -33,13 +33,15 @@ export function OrderCard({
               {status === 'PENDING' ? (
                 <Schedule fontSize="large" sx={{ color: '#ed6c02' }} />
               ) : status === 'WASHED' ? (
-                <Done sx={{ color: '#00ba88' }} />
+                <Done sx={{ color: '#3498db' }} />
               ) : (
-                <DoneAll sx={{ color: '#3498db' }} />
+                <DoneAll sx={{ color: '#00ba88' }} />
               )}
             </Tooltip>
           </div>
-          <Typography variant="caption">{status}</Typography>
+          <Typography variant="caption">
+            {status === 'REMOVED' ? 'GIVE OUT' : status}
+          </Typography>
         </ListItemIcon>
         <ListItemText
           primary={<Typography variant="h6">{order_number}</Typography>}
