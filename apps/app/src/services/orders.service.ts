@@ -32,7 +32,7 @@ export async function getOrders(
         : filter.order_number
         ? { order_number: filter.order_number }
         : filter.status
-        ? { "cloths.status": filter.status }
+        ? { 'cloths.status': filter.status }
         : {}
     );
   return orders.map(({ cloths, ...order }) => ({
@@ -142,28 +142,37 @@ export async function getStatistics(
           $addToSet: '$cloths',
         },
       },
+      $sort: { created_at: 1 },
     },
   ]);
+  let previousAmount = 0;
+  const statsSummaries: IStatsSummary[] = summaries.map(({ orders, _id }) => {
+    const now = new Date(
+      `${_id['year']}-${_id['month'] ?? ''}-${_id['day'] ?? ''}`
+    );
+    const amount = orders.reduce(
+      (amount, cloths) =>
+        amount + cloths.reduce((sum, cloth) => sum + cloth.washing_price, 0),
+      0
+    );
+    const trend =
+      amount > previousAmount
+        ? 'up'
+        : amount < previousAmount
+        ? 'down'
+        : 'flat';
+    previousAmount = amount;
+    return {
+      for: now.toDateString(),
+      trend,
+      value: {
+        amount,
+        count: orders.length,
+      },
+    };
+  });
   return {
     statsOverview,
-    statsSummaries: summaries
-      .map(({ orders, _id }) => {
-        const now = new Date(
-          `${_id['year']}/${_id['month'] ?? ''}/${_id['day'] ?? ''}`
-        );
-        return {
-          for: now.toDateString(),
-          value: {
-            count: orders.length,
-            amount: orders.reduce(
-              (amount, cloths) =>
-                amount +
-                cloths.reduce((sum, cloth) => sum + cloth.washing_price, 0),
-              0
-            ),
-          },
-        };
-      })
-      .sort((a, b) => new Date(a.for).getTime() - new Date(b.for).getTime()),
+    statsSummaries,
   };
 }

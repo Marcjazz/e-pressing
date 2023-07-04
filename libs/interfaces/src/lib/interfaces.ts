@@ -37,6 +37,7 @@ export interface IStatsOverview {
 
 export interface IStatsSummary {
   for: string;
+  trend: 'up' | 'down' | 'flat';
   value: {
     count: number;
     amount: number;

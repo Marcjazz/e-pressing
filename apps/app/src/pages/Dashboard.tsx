@@ -105,13 +105,7 @@ export function Dashboard(props: IDashboardProps) {
           </Box>
           <List>
             {statsSummaries.map((statsSummary, index) => (
-              <StatsCard
-                key={index}
-                {...statsSummary}
-                previousValue={
-                  index > 0 ? statsSummaries[index - 1].value.amount : undefined
-                }
-              />
+              <StatsCard key={index} {...statsSummary} />
             ))}
           </List>
         </Box>

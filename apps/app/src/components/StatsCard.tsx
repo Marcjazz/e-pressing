@@ -1,20 +1,19 @@
 import { IStatsSummary } from '@e-pressing/interfaces';
 import { TrendingDown, TrendingFlat, TrendingUp } from '@mui/icons-material';
 import {
-    Divider,
-    ListItem,
-    ListItemIcon,
-    ListItemText,
-    Typography,
+  Divider,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  Typography,
 } from '@mui/material';
 
 export interface IStatsCardProps extends IStatsSummary {
-  previousValue?: number;
   children?: JSX.Element;
 }
 export function StatsCard({
   for: label,
-  previousValue,
+  trend,
   value: { amount, count },
 }: IStatsCardProps) {
   return (
@@ -43,9 +42,9 @@ export function StatsCard({
           }
         />
         <ListItemIcon>
-          {!previousValue || amount < previousValue ? (
+          {trend === 'up' ? (
             <TrendingUp fontSize="large" color="success" />
-          ) : amount === previousValue ? (
+          ) : trend === 'down' ? (
             <TrendingFlat fontSize="large" color="warning" />
           ) : (
             <TrendingDown fontSize="large" color="error" />
