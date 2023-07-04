@@ -3,22 +3,12 @@ import {
   IStatsOverview,
   IStatsSummary,
 } from '@e-pressing/interfaces';
-import { TrendingDown, TrendingFlat, TrendingUp } from '@mui/icons-material';
-import {
-  Box,
-  Divider,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-  MenuItem,
-  TextField,
-  Typography,
-} from '@mui/material';
+import { Box, List, MenuItem, TextField, Typography } from '@mui/material';
 import { Chart } from 'chart.js/auto';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { toast } from 'react-toastify';
+import { StatsCard } from '../components/StatsCard';
 import { useMongoDB } from '../providers/mongoDB';
 import Layout from '../routes/layout';
 import { getStatistics } from '../services/orders.service';
@@ -77,72 +67,52 @@ export function Dashboard(props: IDashboardProps) {
 
   return (
     <Layout>
-      <div>
-        <canvas id="my-chart"></canvas>
-      </div>
-      <Box sx={{ display: 'grid', gap: 1, gridTemplateColumns: '1fr auto' }}>
-        <Typography variant="h6">Overview</Typography>
-        <TextField
-          id="group-by"
-          name="group_by"
-          label="Group by"
-          size="small"
-          variant="standard"
-          select={true}
-          value={groupBy}
-          defaultValue={'day'}
-          onChange={(e) => setGroupBy(e.target.value as GroupByType)}
-        >
-          <MenuItem value="day">day</MenuItem>
-          <MenuItem value="week">Week</MenuItem>
-          <MenuItem value="month">Month</MenuItem>
-          <MenuItem value="year">Year</MenuItem>
-        </TextField>
+      <Box
+        sx={{
+          display: 'grid',
+          width: '80vw',
+          gridTemplate: {
+            md: '1fr / auto 1fr',
+          },
+        }}
+      >
+        <div>
+          <canvas id="my-chart"></canvas>
+        </div>
+        <Box>
+          <Box
+            sx={{ display: 'grid', gap: 1, gridTemplateColumns: '1fr auto' }}
+          >
+            <Typography variant="h6" marginLeft={2}>Overview</Typography>
+            <TextField
+              id="group-by"
+              name="group_by"
+              label="Group by"
+              size="small"
+              variant="standard"
+              select={true}
+              value={groupBy}
+              defaultValue={'day'}
+              onChange={(e) => setGroupBy(e.target.value as GroupByType)}
+            >
+              <MenuItem value="day">day</MenuItem>
+              <MenuItem value="week">Week</MenuItem>
+              <MenuItem value="month">Month</MenuItem>
+              <MenuItem value="year">Year</MenuItem>
+            </TextField>
+          </Box>
+          <List>
+            {statsSummaries.map((statsSummary, index) => (
+              <StatsCard
+                {...statsSummary}
+                previousValue={
+                  index > 0 ? statsSummaries[index - 1].value.amount : undefined
+                }
+              />
+            ))}
+          </List>
+        </Box>
       </Box>
-      <List>
-        {statsSummaries.map(
-          ({ for: label, value: { amount, count } }, index) => (
-            <>
-              <ListItem
-                key={index}
-                alignItems="flex-start"
-                sx={{
-                  display: 'grid',
-                  gridTemplateColumns: '1fr auto',
-                  alignItems: 'center',
-                  minWidth: '300px',
-                }}
-              >
-                <ListItemText
-                  primary={<Typography variant="subtitle2">{label}</Typography>}
-                  secondary={
-                    <>
-                      <Typography variant="body2">
-                        Number of orders: <b>{count}</b>
-                      </Typography>
-                      <Typography variant="body2">
-                        Generated amount:
-                        <b>{amount}</b>
-                      </Typography>
-                    </>
-                  }
-                />
-                <ListItemIcon>
-                  {index === 0 ||
-                  amount < statsSummaries[index - 1].value.amount ? (
-                    <TrendingUp fontSize="large" color="success" />
-                  ) : amount === statsSummaries[index - 1].value.amount ? (
-                    <TrendingFlat fontSize="large" color="warning" />
-                  ) : (
-                    <TrendingDown fontSize="large" color="error" />
-                  )}
-                </ListItemIcon>
-              </ListItem>
-              <Divider />
-            </>
-          )
-        )}
-      </List>
     </Layout>
   );
 }

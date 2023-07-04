@@ -17,7 +17,7 @@ import { theme } from '../theme';
 import { useRealmApp } from '../providers/realm';
 
 interface ILayoutProps {
-  children?: Array<JSX.Element>;
+  children?: JSX.Element;
 }
 function Layout({ children }: ILayoutProps) {
   const { logOut } = useRealmApp();
