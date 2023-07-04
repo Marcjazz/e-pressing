@@ -11,13 +11,13 @@ export const routes = [
     path: '/',
     element: <LogInPage />,
   },
+  { path: '/dashboard', element: <Dashboard /> },
   {
-    path: 'orders',
+    path: '/orders',
     element: <Layout />,
     children: [
       { path: '', element: <OrdersPage /> },
       { path: 'new', element: <OrderFormPage /> },
-      { path: 'dashboard', element: <Dashboard /> },
       { path: ':order_number', element: <OrderPage /> },
     ],
   },

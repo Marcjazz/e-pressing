@@ -20,6 +20,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { toast } from 'react-toastify';
 import { useMongoDB } from '../providers/mongoDB';
+import Layout from '../routes/layout';
 import { getStatistics } from '../services/orders.service';
 
 export interface IDashboardProps {
@@ -38,7 +39,7 @@ export function Dashboard(props: IDashboardProps) {
   const [statsSummaries, setStatsSummaries] = useState<IStatsSummary[]>([]);
   useEffect(() => {
     if (!db) {
-      toast.error('Mongo database was not loaded successfully !!!');
+      toast.error('No active session was found, please sign in !!!');
       return navigate('/');
     }
     getStatistics(db, groupBy)
@@ -51,10 +52,11 @@ export function Dashboard(props: IDashboardProps) {
   }, [groupBy]);
 
   const ctx = document.getElementById('my-chart');
+  const [chart, setChart] = useState<Chart<'doughnut', number[], string>>();
   useEffect(() => {
-    console.log({ ctx });
-    if (ctx)
-      new Chart(ctx as HTMLCanvasElement, {
+    if (ctx) {
+      chart?.destroy();
+      const newChart = new Chart(ctx as HTMLCanvasElement, {
         type: 'doughnut',
         data: {
           labels: ['Pending orders', 'Washed cloths', 'Removed cloths'],
@@ -68,12 +70,16 @@ export function Dashboard(props: IDashboardProps) {
           ],
         },
       });
+      setChart(newChart);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ctx]);
 
   return (
-    <Box>
-      <canvas id="my-chart"></canvas>
+    <Layout>
+      <div>
+        <canvas id="my-chart"></canvas>
+      </div>
       <Box sx={{ display: 'grid', gap: 1, gridTemplateColumns: '1fr auto' }}>
         <Typography variant="h6">Overview</Typography>
         <TextField
@@ -137,6 +143,6 @@ export function Dashboard(props: IDashboardProps) {
           )
         )}
       </List>
-    </Box>
+    </Layout>
   );
 }

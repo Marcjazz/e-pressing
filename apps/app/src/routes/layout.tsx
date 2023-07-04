@@ -16,7 +16,10 @@ import { Outlet, useNavigate } from 'react-router';
 import { theme } from '../theme';
 import { useRealmApp } from '../providers/realm';
 
-function ResponsiveAppBar() {
+interface ILayoutProps {
+  children?: Array<JSX.Element>;
+}
+function Layout({ children }: ILayoutProps) {
   const { logOut } = useRealmApp();
   const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(
     null
@@ -42,7 +45,7 @@ function ResponsiveAppBar() {
 
   const navigate = useNavigate();
   const pages = [
-    { route: '/orders/dashboard', name: 'Dashboard' },
+    { route: '/dashboard', name: 'Dashboard' },
     { route: '/orders/new', name: 'New order' },
     { route: '/orders', name: 'Placed orders' },
   ];
@@ -194,9 +197,9 @@ function ResponsiveAppBar() {
           rowGap: theme.spacing(4.375),
         }}
       >
-        <Outlet />
+        {children ?? <Outlet />}
       </Box>
     </Box>
   );
 }
-export default ResponsiveAppBar;
+export default Layout;
