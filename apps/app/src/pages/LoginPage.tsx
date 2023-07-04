@@ -1,5 +1,11 @@
-import { Adb } from '@mui/icons-material';
-import { Box, Button, TextField, Typography } from '@mui/material';
+import { Adb, Visibility } from '@mui/icons-material';
+import {
+  Box,
+  Button,
+  InputAdornment,
+  TextField,
+  Typography,
+} from '@mui/material';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { toast } from 'react-toastify';
@@ -29,6 +35,7 @@ export default function LogInPage() {
       .catch(toast.error)
       .finally(() => setIsSubmitting(false));
   }
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
   return (
     <Box
@@ -45,6 +52,7 @@ export default function LogInPage() {
           },
         }}
         textAlign="center"
+        component="form"
         display="grid"
         minWidth="350px"
         padding={5}
@@ -90,12 +98,23 @@ export default function LogInPage() {
           fullWidth
           variant="standard"
           placeholder="**********"
-          type="password"
+          type={isPasswordVisible ? 'text' : 'password'}
           onChange={(e) => setPassword(e.target.value)}
           value={password}
           disabled={isSubmitting}
+          InputProps={{
+            endAdornment: (
+              <InputAdornment
+                position="end"
+                onClick={() => setIsPasswordVisible(!isPasswordVisible)}
+              >
+                <Visibility />
+              </InputAdornment>
+            ),
+          }}
         />
         <Button
+          type="submit"
           color="primary"
           disabled={isSubmitting}
           variant="contained"
