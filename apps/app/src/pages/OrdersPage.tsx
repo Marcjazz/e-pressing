@@ -90,8 +90,7 @@ export default function OrdersPage(props: IOrdersPageProps) {
               label="Order status"
               size="small"
               variant="standard"
-              value={status}
-              defaultValue={status}
+              defaultValue="PENDING"
               onChange={(e) => setStatus(e.target.value as ClothStatus)}
             >
               <MenuItem value="PENDING">Pending</MenuItem>
@@ -123,7 +122,7 @@ export default function OrdersPage(props: IOrdersPageProps) {
           }}
         >
           <Typography variant="h6">No order is registered yet !</Typography>
-          <Button variant="contained" onClick={() => navigate('/-/new')}>
+          <Button variant="contained" onClick={() => navigate('/orders/new')}>
             new order
           </Button>
         </Box>
