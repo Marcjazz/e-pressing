@@ -2,6 +2,7 @@ import * as RealmWeb from 'realm-web';
 
 import React, { useContext, useState } from 'react';
 import { toast } from 'react-toastify';
+import { useNavigate } from 'react-router';
 
 const RealmAppContext = React.createContext<{
   logIn: (email: string, password: string) => Promise<RealmWeb.User | null>;
@@ -10,6 +11,7 @@ const RealmAppContext = React.createContext<{
 } | null>(null);
 
 const RealmApp = ({ children }: { children: JSX.Element }) => {
+  const navigate = useNavigate();
   const app = new RealmWeb.App({ id: 'e-pressing-madeo' });
   const [user, setUser] = useState<RealmWeb.User | null>(null);
 
@@ -30,6 +32,7 @@ const RealmApp = ({ children }: { children: JSX.Element }) => {
     if (user !== null) {
       app.currentUser?.logOut();
       setUser(null);
+      navigate('/');
     }
   };
 
