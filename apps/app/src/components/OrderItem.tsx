@@ -38,14 +38,14 @@ export default function OrderItem({
 
   return (
     <Box>
-      <Box sx={{ display: 'flex' }}>
+      <Box sx={{ display: 'flex', alignItems: 'center' }}>
         <Tooltip title={status}>
           {status === 'PENDING' ? (
-            <Schedule fontSize="large" sx={{ color: '#ed6c02' }} />
+            <Schedule fontSize="medium" sx={{ color: '#ed6c02' }} />
           ) : status === 'WASHED' ? (
-            <Done fontSize="large" sx={{ color: '#3498db' }} />
+            <Done fontSize="medium" sx={{ color: '#3498db' }} />
           ) : (
-            <DoneAll fontSize="large" sx={{ color: '#00ba88' }} />
+            <DoneAll fontSize="medium" sx={{ color: '#00ba88' }} />
           )}
         </Tooltip>
         <Box
@@ -97,9 +97,10 @@ export default function OrderItem({
             size="small"
             variant="contained"
             sx={{ height: 'fit-content' }}
+            color={status === 'WASHED' ? 'success' : 'primary'}
             onClick={() => handleStatusChange(cloth_id, newStatus)}
           >
-            {newStatus}
+            {newStatus === 'REMOVED' ? 'GiVE OUT' : newStatus}
           </Button>
         </Box>
       </Collapse>

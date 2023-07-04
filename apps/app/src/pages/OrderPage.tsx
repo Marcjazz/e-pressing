@@ -41,7 +41,7 @@ export default function OrderPage(props: IOrderPageProps) {
       return navigate('/');
     }
     if (order_number)
-      getOrder(db, order_number)
+      getOrder(db, order_number.toUpperCase())
         .then((order) => (order ? setOrder(order) : null))
         .catch(toast.error);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -120,13 +120,19 @@ export default function OrderPage(props: IOrderPageProps) {
           <Typography variant="caption">{status}</Typography>
         </Box>
         <Box sx={{ textAlign: 'center' }}>
-          <Typography variant="h6">{order_number}</Typography>
+          <Typography variant="h6">{order_number?.toUpperCase()}</Typography>
           <Typography variant="body2">
             {` ${client_fullname}, ${client_phone_number}`}
           </Typography>
           <Typography variant="body2" color="text.primary">
             <b>Due date:</b>
             {` ${new Date(reception_date).toDateString()}`}
+          </Typography>
+          <Typography variant="body1" fontWeight={500}>
+            {`Amount due: ${cloths.reduce(
+              (total, _) => total + _.quantity * _.washing_price,
+              0
+            )}`}
           </Typography>
         </Box>
       </Box>
@@ -148,9 +154,10 @@ export default function OrderPage(props: IOrderPageProps) {
       </div>
       {order_number && expandedNumber === 0 && (
         <Button
-          variant="contained"
           size="small"
+          variant="contained"
           sx={{ width: '50%', justifySelf: 'center' }}
+          color={status === 'WASHED' ? 'success' : 'primary'}
           disabled={isSubmitting || selected.length === 0}
           onClick={() =>
             handleStatusChange(
@@ -160,7 +167,7 @@ export default function OrderPage(props: IOrderPageProps) {
           }
         >
           {isSubmitting && <CircularProgress />}
-          {status === 'PENDING' ? 'WASHED' : 'REMOVED'}
+          {status === 'PENDING' ? 'WASHED' : 'GIVE OUT'}
         </Button>
       )}
     </Box>

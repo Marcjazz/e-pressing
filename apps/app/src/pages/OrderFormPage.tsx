@@ -158,9 +158,9 @@ function useNewOrder() {
       })
         .then((orderNumber) => {
           toast.success('Order submitted successfully !!!');
-          navigate(`/orders/${orderNumber}`);
+          navigate(`/orders/${orderNumber.toLowerCase()}`);
         })
-        .catch(toast.error)
+        .catch((error) => toast.error(error.toString()))
         .finally(() => setIsSubmitting(false));
     }
   };
@@ -236,9 +236,10 @@ export default function OrderFormPage(props: IOrderFormPageProps) {
           <Button
             size="medium"
             variant="contained"
+            disabled={isSubmitting}
             onClick={sumbitNewOrderHandler}
           >
-            {isSubmitting && <CircularProgress />}
+            {isSubmitting && <CircularProgress size="small" />}
             submit
           </Button>
         </Box>
