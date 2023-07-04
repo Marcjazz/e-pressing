@@ -45,7 +45,7 @@ export interface IStatsSummary {
 
 export interface IOrder extends Omit<IOrderDetails, 'cloths'> {
   status: ClothStatus;
-  created_at: string;
+  created_at: Date;
   client_fullname: string;
   number_of_cloths: number;
   client_phone_number: string;
