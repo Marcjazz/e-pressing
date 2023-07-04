@@ -1,51 +1,28 @@
 import { CssBaseline, ThemeProvider } from '@mui/material';
-import { IntlProvider } from 'react-intl';
 import { useRoutes } from 'react-router';
 import { Flip, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { useLanguage } from './contexts/language/LanguageContextProvider';
-import enMessages from './languages/en-us';
-import frMessages from './languages/fr';
 import { routes } from './routes';
 import { theme } from './theme';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 export function App() {
   const routing = useRoutes(routes);
-  const { activeLanguage } = useLanguage();
-  const activeMessages = activeLanguage === 'Fr' ? frMessages : enMessages;
-
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: {
-        refetchOnWindowFocus: process.env.NODE_ENV === 'development',
-      },
-    },
-  });
 
   return (
-    <IntlProvider
-      messages={activeMessages}
-      locale={activeLanguage}
-      defaultLocale="Fr"
-    >
-      <ThemeProvider theme={theme}>
-        <ToastContainer
-          position="top-right"
-          autoClose={1000}
-          newestOnTop
-          closeOnClick
-          rtl={false}
-          pauseOnFocusLoss
-          draggable
-          transition={Flip}
-        />
-        <CssBaseline />
-        <QueryClientProvider client={queryClient}>
-          {routing}
-        </QueryClientProvider>
-      </ThemeProvider>
-    </IntlProvider>
+    <ThemeProvider theme={theme}>
+      <ToastContainer
+        position="top-right"
+        autoClose={1000}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        transition={Flip}
+      />
+      <CssBaseline />
+      {routing}
+    </ThemeProvider>
   );
 }
 
