@@ -1,5 +1,6 @@
 import { IOrder } from '@e-pressing/interfaces';
 import {
+  Box,
   ListItem,
   ListItemIcon,
   ListItemText,
@@ -28,7 +29,7 @@ export function OrderCard({
     <Paper onClick={() => navigate(`/orders/${order_number}`)}>
       <ListItem alignItems="flex-start" sx={{ gap: theme.spacing(1) }}>
         <ListItemIcon sx={{ display: 'grid' }}>
-          <div style={{ justifySelf: 'center' }}>
+          <Box style={{ justifySelf: 'center' }}>
             <Tooltip title={status}>
               {status === 'PENDING' ? (
                 <Schedule fontSize="large" sx={{ color: '#ed6c02' }} />
@@ -38,7 +39,7 @@ export function OrderCard({
                 <DoneAll sx={{ color: '#00ba88' }} />
               )}
             </Tooltip>
-          </div>
+          </Box>
           <Typography variant="caption">
             {status === 'REMOVED' ? 'GIVE OUT' : status}
           </Typography>
@@ -47,7 +48,7 @@ export function OrderCard({
           primary={<Typography variant="h6">{order_number}</Typography>}
           secondary={
             <>
-              <div>
+              <Box>
                 <Typography
                   sx={{ display: 'inline' }}
                   component="span"
@@ -58,11 +59,11 @@ export function OrderCard({
                 </Typography>
                 <b>Due date:</b>
                 {` ${new Date(reception_date).toDateString()}, `}
-              </div>
-              <div>
+              </Box>
+              <Box>
                 <b>Client:</b>
                 {` ${client_fullname}, ${client_phone_number}`}
-              </div>
+              </Box>
             </>
           }
         />

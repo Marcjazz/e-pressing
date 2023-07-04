@@ -83,7 +83,9 @@ export function Dashboard(props: IDashboardProps) {
           <Box
             sx={{ display: 'grid', gap: 1, gridTemplateColumns: '1fr auto' }}
           >
-            <Typography variant="h6" marginLeft={2}>Overview</Typography>
+            <Typography variant="h6" marginLeft={2}>
+              Overview
+            </Typography>
             <TextField
               id="group-by"
               name="group_by"
@@ -104,6 +106,7 @@ export function Dashboard(props: IDashboardProps) {
           <List>
             {statsSummaries.map((statsSummary, index) => (
               <StatsCard
+                key={index}
                 {...statsSummary}
                 previousValue={
                   index > 0 ? statsSummaries[index - 1].value.amount : undefined
