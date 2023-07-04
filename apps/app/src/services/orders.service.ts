@@ -142,35 +142,45 @@ export async function getStatistics(
           $addToSet: '$cloths',
         },
       },
-      $sort: { created_at: 1 },
     },
   ]);
+  const createDate = (payload: Record<GroupByType, number> | string) => {
+    return typeof payload === 'string'
+      ? new Date(payload)
+      : new Date(
+          `${payload['year']}-${payload['month'] ?? ''}-${payload['day'] ?? ''}`
+        );
+  };
   let previousAmount = 0;
-  const statsSummaries: IStatsSummary[] = summaries.map(({ orders, _id }) => {
-    const now = new Date(
-      `${_id['year']}-${_id['month'] ?? ''}-${_id['day'] ?? ''}`
-    );
-    const amount = orders.reduce(
-      (amount, cloths) =>
-        amount + cloths.reduce((sum, cloth) => sum + cloth.washing_price, 0),
-      0
-    );
-    const trend =
-      amount > previousAmount
-        ? 'up'
-        : amount < previousAmount
-        ? 'down'
-        : 'flat';
-    previousAmount = amount;
-    return {
-      for: now.toDateString(),
-      trend,
-      value: {
-        amount,
-        count: orders.length,
-      },
-    };
-  });
+  const statsSummaries: IStatsSummary[] = summaries
+    .map(({ orders, _id }, i) => {
+      const now = createDate(_id);
+      const amount = orders.reduce(
+        (amount, cloths) =>
+          amount +
+          cloths.reduce(
+            (sum, cloth) => sum + cloth.washing_price * cloth.quantity,
+            0
+          ),
+        0
+      );
+      const trend: IStatsSummary['trend'] =
+        amount > previousAmount
+          ? 'up'
+          : amount === previousAmount
+          ? 'flat'
+          : 'down';
+      previousAmount = amount;
+      return {
+        trend,
+        value: {
+          amount,
+          count: orders.length,
+        },
+        for: now.toDateString(),
+      };
+    })
+    .sort((a, b) => createDate(b.for).getTime() - createDate(a.for).getTime());
   return {
     statsOverview,
     statsSummaries,
