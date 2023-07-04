@@ -15,6 +15,7 @@ import * as React from 'react';
 import { Outlet, useNavigate } from 'react-router';
 import { theme } from '../theme';
 import { useRealmApp } from '../providers/realm';
+import { useEffect } from 'react';
 
 interface ILayoutProps {
   children?: JSX.Element;
@@ -45,7 +46,11 @@ function Layout({ children }: ILayoutProps) {
   };
 
   const navigate = useNavigate();
-  if (!user) navigate('/');
+  useEffect(() => {
+    if (!user) navigate('/');
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const pages = [
     { route: '/dashboard', name: 'Dashboard' },
