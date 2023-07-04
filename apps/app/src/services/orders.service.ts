@@ -65,7 +65,7 @@ export async function createNewOrder(
     .split('.')[1]
     .toUpperCase()
     .substring(0, 6)}`;
-  const data = await db.collection<IPlacedOrder>('placed_orders').insertOne({
+  await db.collection<IPlacedOrder>('placed_orders').insertOne({
     reception_date,
     client_fullname,
     client_phone_number,
@@ -75,9 +75,9 @@ export async function createNewOrder(
       status: 'PENDING',
       cloth_id: crypto.randomUUID(),
     })),
-    created_at: '$$NOW',
+    created_at: new Date(),
   });
-  return data;
+  return orderNumber;
 }
 
 export async function changeOrderStatus(
