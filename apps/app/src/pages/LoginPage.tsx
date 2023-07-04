@@ -1,9 +1,9 @@
+import { Adb } from '@mui/icons-material';
 import { Box, Button, TextField, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
-import { useRealmApp } from '../providers/realm';
-import { Adb } from '@mui/icons-material';
 import { useNavigate } from 'react-router';
 import { toast } from 'react-toastify';
+import { useRealmApp } from '../providers/realm';
 
 export default function LogInPage() {
   const { logIn, user } = useRealmApp();
@@ -13,17 +13,21 @@ export default function LogInPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (user) navigate('/orders');
+    if (user) navigate('/dashboard');
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   function handleLogIn() {
+    setIsSubmitting(true);
     logIn(email, password)
       .then((user) => {
         if (user) toast.success(`Welcome back ${user?.profile.firstName} !!!`);
         else toast.error('Incorrect user email or password.');
       })
-      .catch(toast.error);
+      .catch(toast.error)
+      .finally(() => setIsSubmitting(false));
   }
 
   return (
@@ -78,6 +82,7 @@ export default function LogInPage() {
           onChange={(e) => setEmail(e.target.value)}
           value={email}
           variant="standard"
+          disabled={isSubmitting}
         />
         <TextField
           label="Password"
@@ -88,8 +93,14 @@ export default function LogInPage() {
           type="password"
           onChange={(e) => setPassword(e.target.value)}
           value={password}
+          disabled={isSubmitting}
         />
-        <Button color="primary" variant="contained" onClick={handleLogIn}>
+        <Button
+          color="primary"
+          disabled={isSubmitting}
+          variant="contained"
+          onClick={handleLogIn}
+        >
           Log in
         </Button>
       </Box>

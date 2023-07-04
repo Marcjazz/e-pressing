@@ -3,8 +3,9 @@ import { Done, DoneAll, Schedule } from '@mui/icons-material';
 import {
   Box,
   Button,
+  CircularProgress,
   Tooltip,
-  Typography
+  Typography,
 } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
@@ -36,7 +37,7 @@ export default function OrderPage(props: IOrderPageProps) {
 
   useEffect(() => {
     if (!db) {
-      toast.error('Mongo database was not loaded successfully !!!');
+      toast.error('No active session was found, please sign in !!!');
       return navigate('/');
     }
     if (order_number)
@@ -46,12 +47,15 @@ export default function OrderPage(props: IOrderPageProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [order_number]);
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const handleStatusChange = (selected: string[], newStatus: ClothStatus) => {
     if (!db) {
-      toast.error('Mongo database was not loaded successfully !!!');
+      toast.error('No active session was found, please sign in !!!');
       return navigate('/');
     }
-    if (order_number)
+    if (order_number) {
+      setIsSubmitting(true);
       changeOrderStatus(db, {
         clothIds: selected,
         status: newStatus,
@@ -67,7 +71,9 @@ export default function OrderPage(props: IOrderPageProps) {
             ),
           }));
         })
-        .catch((error) => toast.error(error));
+        .catch((error) => toast.error(error))
+        .finally(() => setIsSubmitting(false));
+    }
   };
   const status = cloths.find((_) => _.status === 'PENDING')
     ? 'PENDING'
@@ -145,7 +151,7 @@ export default function OrderPage(props: IOrderPageProps) {
           variant="contained"
           size="small"
           sx={{ width: '50%', justifySelf: 'center' }}
-          disabled={selected.length === 0}
+          disabled={isSubmitting || selected.length === 0}
           onClick={() =>
             handleStatusChange(
               selected,
@@ -153,6 +159,7 @@ export default function OrderPage(props: IOrderPageProps) {
             )
           }
         >
+          {isSubmitting && <CircularProgress />}
           {status === 'PENDING' ? 'WASHED' : 'REMOVED'}
         </Button>
       )}

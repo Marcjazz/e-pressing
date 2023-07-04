@@ -4,6 +4,7 @@ import { theme } from '../theme';
 
 interface IOrderFormProps extends ICreateCloth {
   errors: Error[];
+  disabled: boolean;
   textFieldId: string;
   children?: JSX.Element;
   onChangeHandler: (id: string, updatedCloth: Partial<ICreateCloth>) => void;
@@ -14,6 +15,7 @@ export default function OrderForm({
   cloth_name,
   washing_price,
 
+  disabled,
   textFieldId,
   onChangeHandler,
 }: IOrderFormProps) {
@@ -38,6 +40,7 @@ export default function OrderForm({
         fullWidth
         variant="standard"
         value={cloth_name}
+        disabled={disabled}
         helperText={textFieldError}
         error={Boolean(textFieldError)}
         onChange={(e) =>
@@ -59,6 +62,7 @@ export default function OrderForm({
           variant="standard"
           type="number"
           value={washing_price}
+          disabled={disabled}
           onChange={(e) =>
             onChangeHandler(textFieldId, {
               washing_price: Number(e.target.value),
@@ -73,6 +77,7 @@ export default function OrderForm({
           variant="standard"
           type="number"
           value={quantity}
+          disabled={disabled}
           onChange={(e) =>
             onChangeHandler(textFieldId, { quantity: Number(e.target.value) })
           }

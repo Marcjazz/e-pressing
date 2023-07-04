@@ -3,6 +3,7 @@ import { Add } from '@mui/icons-material';
 import {
   Box,
   Button,
+  CircularProgress,
   IconButton,
   TextField,
   Tooltip,
@@ -136,21 +137,26 @@ function useNewOrder() {
     setErrors((errors) => (errors ? [...errors, ...newErrors] : newErrors));
     return newErrors;
   };
-
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const sumbitNewOrderHandler = () => {
     const errors = validtedFields();
     if (errors.length === 0) {
       if (!db) {
-        toast.error('Mongo database was not loaded successfully !!!');
+        toast.error('No active session was found, please sign in !!!');
         return navigate('/');
       }
+      setIsSubmitting(true);
       createNewOrder(db, {
         ...client,
         reception_date: receptionDate,
         cloths: newItems.map((_) => _.value),
       })
-        .then(() => navigate('/orders'))
-        .catch(toast.error);
+        .then((orderNumber) => {
+          toast.success('Order submitted successfully !!!');
+          navigate(`/orders/${orderNumber}`);
+        })
+        .catch(toast.error)
+        .finally(() => setIsSubmitting(false));
     }
   };
 
@@ -158,6 +164,7 @@ function useNewOrder() {
     errors,
     client,
     newItems,
+    isSubmitting,
     receptionDate,
     dispatchers: {
       addClothHandler,
@@ -173,6 +180,7 @@ export default function OrderFormPage(props: IOrderFormPageProps) {
   const {
     errors,
     newItems,
+    isSubmitting,
     receptionDate,
     client: { client_fullname, client_phone_number },
     dispatchers: {
@@ -226,10 +234,11 @@ export default function OrderFormPage(props: IOrderFormPageProps) {
           </IconButton>
         </Box>
         <Button
-          size="small"
+          size="medium"
           variant="contained"
           onClick={sumbitNewOrderHandler}
         >
+          {isSubmitting && <CircularProgress />}
           submit
         </Button>
         <TextField
@@ -242,6 +251,7 @@ export default function OrderFormPage(props: IOrderFormPageProps) {
           value={client_fullname}
           helperText={fullnameeError}
           error={Boolean(fullnameeError)}
+          disabled={isSubmitting}
           onChange={(e) =>
             updateClientHandler({ client_fullname: e.target.value })
           }
@@ -256,8 +266,11 @@ export default function OrderFormPage(props: IOrderFormPageProps) {
           value={client_phone_number}
           helperText={clientPhoneNumberError}
           error={Boolean(clientPhoneNumberError)}
+          disabled={isSubmitting}
           onChange={(e) =>
-            updateClientHandler({ client_phone_number: e.target.value.slice(0, 9) })
+            updateClientHandler({
+              client_phone_number: e.target.value.slice(0, 9),
+            })
           }
         />
         <TextField
@@ -275,6 +288,7 @@ export default function OrderFormPage(props: IOrderFormPageProps) {
           }
           helperText={receptionDateError}
           error={Boolean(receptionDateError)}
+          disabled={isSubmitting}
           onChange={(e) => {
             const date = e.target.value;
             if (new Date(date) > new Date()) receptionDateHandler(date);
@@ -286,6 +300,7 @@ export default function OrderFormPage(props: IOrderFormPageProps) {
             key={fake_id}
             errors={errors}
             textFieldId={fake_id}
+            disabled={isSubmitting}
             onChangeHandler={updateClothHandler}
           />
         ))}
