@@ -4,7 +4,7 @@ import {
   Box,
   Button,
   CircularProgress,
-  IconButton,
+  Fab,
   TextField,
   Tooltip,
   Typography,
@@ -45,6 +45,7 @@ function useNewOrder() {
     const errors = validtedFields();
     if (errors.length === 0)
       setNewItems((newItems) => [
+        ...newItems,
         {
           item_id: `item-${newItems.length + 1}`,
           value: {
@@ -53,12 +54,13 @@ function useNewOrder() {
             washing_price: 100,
           },
         },
-        ...newItems,
       ]);
   };
 
   const removeClothHandler = (fake_id: string) => {
-    setNewItems((newItems) => newItems.filter((_) => _.item_id === fake_id));
+    if (newItems.length > 1)
+      setNewItems((newItems) => newItems.filter((_) => _.item_id !== fake_id));
+    else toast.error('Order must have at least one cloth item');
   };
 
   const updateClothHandler = (
@@ -72,7 +74,7 @@ function useNewOrder() {
           : cloth;
       })
     );
-    validtedFields();
+    validtedFields('item');
   };
 
   const updateClientHandler = (data: Partial<IClient>) => {
@@ -111,16 +113,19 @@ function useNewOrder() {
     return newErrors;
   };
 
-  const validtedFields = () => {
+  const validtedFields = (scope: 'all' | 'item' = 'all') => {
     setErrors([]);
-    const newErrors: Error[] = validateClientFieds(client);
+    const newErrors: Error[] = [];
 
-    if (!receptionDate)
-      newErrors.push({
-        field: 'reception_date',
-        item_id: 'reception_date',
-        error: 'This field is required !',
-      });
+    if (scope === 'all') {
+      newErrors.push(...validateClientFieds(client));
+      if (!receptionDate)
+        newErrors.push({
+          field: 'reception_date',
+          item_id: 'reception_date',
+          error: 'This field is required !',
+        });
+    }
     newItems.forEach(({ item_id, value: cloth }) => {
       Object.keys(cloth).forEach((key) => {
         const clothKey = key as keyof ICreateCloth;
@@ -185,6 +190,7 @@ export default function OrderFormPage(props: IOrderFormPageProps) {
     client: { client_fullname, client_phone_number },
     dispatchers: {
       addClothHandler,
+      removeClothHandler,
       updateClothHandler,
       updateClientHandler,
       receptionDateHandler,
@@ -227,20 +233,15 @@ export default function OrderFormPage(props: IOrderFormPageProps) {
           <Typography variant="subtitle2">
             {new Date().toUTCString()}
           </Typography>
-          <IconButton onClick={addClothHandler}>
-            <Tooltip title="add new item">
-              <Add color="secondary" />
-            </Tooltip>
-          </IconButton>
+          <Button
+            size="medium"
+            variant="contained"
+            onClick={sumbitNewOrderHandler}
+          >
+            {isSubmitting && <CircularProgress />}
+            submit
+          </Button>
         </Box>
-        <Button
-          size="medium"
-          variant="contained"
-          onClick={sumbitNewOrderHandler}
-        >
-          {isSubmitting && <CircularProgress />}
-          submit
-        </Button>
         <TextField
           id={`client_fullname`}
           name={`client_fullname`}
@@ -302,8 +303,19 @@ export default function OrderFormPage(props: IOrderFormPageProps) {
             textFieldId={fake_id}
             disabled={isSubmitting}
             onChangeHandler={updateClothHandler}
+            removeClothHandler={removeClothHandler}
           />
         ))}
+        <Fab
+          color="secondary"
+          size="medium"
+          sx={{ justifySelf: 'end', position: 'fixed', bottom: 45 }}
+          onClick={addClothHandler}
+        >
+          <Tooltip title="add new item">
+            <Add />
+          </Tooltip>
+        </Fab>
       </Box>
     </Box>
   );
