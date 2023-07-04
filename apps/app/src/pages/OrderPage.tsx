@@ -22,7 +22,8 @@ export interface IOrderPageProps {
 export default function OrderPage(props: IOrderPageProps) {
   const { db } = useMongoDB();
   const navigate = useNavigate();
-  const { order_number } = useParams();
+  let { order_number: orderNumber } = useParams();
+  orderNumber = orderNumber?.toUpperCase();
 
   const [
     { cloths, reception_date, client_fullname, client_phone_number },
@@ -40,12 +41,12 @@ export default function OrderPage(props: IOrderPageProps) {
       toast.error('No active session was found, please sign in !!!');
       return navigate('/');
     }
-    if (order_number)
-      getOrder(db, order_number.toUpperCase())
+    if (orderNumber)
+      getOrder(db, orderNumber)
         .then((order) => (order ? setOrder(order) : null))
         .catch(toast.error);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [order_number]);
+  }, [orderNumber]);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -54,12 +55,12 @@ export default function OrderPage(props: IOrderPageProps) {
       toast.error('No active session was found, please sign in !!!');
       return navigate('/');
     }
-    if (order_number) {
+    if (orderNumber) {
       setIsSubmitting(true);
       changeOrderStatus(db, {
         clothIds: selected,
         status: newStatus,
-        order_number,
+        order_number: orderNumber,
       })
         .then(() => {
           setOrder((order) => ({
@@ -120,7 +121,7 @@ export default function OrderPage(props: IOrderPageProps) {
           <Typography variant="caption">{status}</Typography>
         </Box>
         <Box sx={{ textAlign: 'center' }}>
-          <Typography variant="h6">{order_number?.toUpperCase()}</Typography>
+          <Typography variant="h6">{orderNumber}</Typography>
           <Typography variant="body2">
             {` ${client_fullname}, ${client_phone_number}`}
           </Typography>
@@ -152,7 +153,7 @@ export default function OrderPage(props: IOrderPageProps) {
           />
         ))}
       </div>
-      {order_number && expandedNumber === 0 && (
+      {orderNumber && expandedNumber === 0 && (
         <Button
           size="small"
           variant="contained"

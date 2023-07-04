@@ -45,9 +45,9 @@ export function StatsCard({
           {trend === 'up' ? (
             <TrendingUp fontSize="large" color="success" />
           ) : trend === 'down' ? (
-            <TrendingFlat fontSize="large" color="warning" />
-          ) : (
             <TrendingDown fontSize="large" color="error" />
+          ) : (
+            <TrendingFlat fontSize="large" color="warning" />
           )}
         </ListItemIcon>
       </ListItem>
